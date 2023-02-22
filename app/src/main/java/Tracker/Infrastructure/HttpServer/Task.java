@@ -19,7 +19,7 @@ public class Task implements Runnable  {
     public void run() {
         try {
             HttpRequestObject httpRequest = this.connection.getHttpRequest();
-            new RequestHandler().handleRequest(httpRequest);
+            this.connection.HttpResponse(new RequestHandler().handleRequest(httpRequest)); 
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
