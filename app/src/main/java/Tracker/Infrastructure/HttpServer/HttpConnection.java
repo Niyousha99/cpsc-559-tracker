@@ -11,6 +11,7 @@ import java.util.Queue;
 
 import Tracker.BusinessLogic.HttpRequestObject;
 import Tracker.BusinessLogic.HttpResponse;
+import Tracker.BusinessLogic.Utiles.HttpRequestBuilder;
 import Tracker.Infrastructure.Utils.FailureException;
 import Tracker.Infrastructure.Utils.Parsing.Parser;
 import Tracker.Infrastructure.Utils.Parsing.Scanner;
@@ -28,15 +29,25 @@ public class HttpConnection {
         Queue<Token> queue = new LinkedList<Token>();
         Scanner scanner = new Scanner(inputStream, queue);
         Parser parser = new Parser(scanner, queue);
-        HttpRequestObject requestObject = parser.parse();
-        inputStream.close();
-        return requestObject;
+        HttpRequestBuilder requestBuilder = parser.parse();
+
+        int iterator = scanner.getContext();
+        String context = scanner.consumeContext();
+        String body = context.substring(iterator);
+        scanner.nextContext();
+        String tmp = scanner.consumeContext();
+        if (tmp != null) {
+            body = body + tmp;
+        }
+        requestBuilder = requestBuilder.withBody(body);
+        return requestBuilder.build();
     }
 
     public void HttpResponse(HttpResponse response) throws IOException {
         DataOutputStream outputStream = new DataOutputStream(this.socket.getOutputStream());
         outputStream.write(response.toString().getBytes());
         outputStream.flush();
+        socket.shutdownOutput();
         outputStream.close();
         this.socket.close();
     }

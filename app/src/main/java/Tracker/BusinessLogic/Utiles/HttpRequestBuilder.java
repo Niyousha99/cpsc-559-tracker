@@ -30,6 +30,10 @@ public class HttpRequestBuilder {
         new AbstractMap.SimpleEntry<String, Boolean>("HTTP/1.0", true)
     );
 
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
     public HttpRequestBuilder withHttpMethod(String httpMethod) {
         this.httpMethod = httpMethod;
         return this;

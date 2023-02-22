@@ -16,12 +16,20 @@ public class Server extends Thread {
     public void listen() {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
+            serverSocket.setSoTimeout(TIMEOUT);
             //serverSocket.setSoTimeout(TIMEOUT);
             ExecutorService cachedThreads = Executors.newCachedThreadPool();
 
             while (true) {
-                Socket socket = serverSocket.accept();
-                cachedThreads.execute(new Task(socket));
+                try {
+                    Socket socket = serverSocket.accept();
+                    socket.setSoTimeout(TIMEOUT);
+                    cachedThreads.execute(new Task(socket));
+                }
+
+                catch (SocketTimeoutException se) {
+                    serverSocket.setSoTimeout(1000);
+                }
             }
         }
 

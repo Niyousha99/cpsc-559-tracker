@@ -3,6 +3,7 @@ package Tracker.Infrastructure.Utils.Parsing;
 import java.util.Stack;
 
 import Tracker.BusinessLogic.HttpRequestObject;
+import Tracker.BusinessLogic.Utiles.HttpRequestBuilder;
 import Tracker.Infrastructure.Utils.FailureException;
 import Tracker.Infrastructure.Utils.Parsing.Actions.Action;
 
@@ -22,8 +23,7 @@ public class Parser {
     private String path;
     private String version;
     private Map<String, String> headers = new HashMap<String, String>();
-    private String body;
-
+    
     private ArrayList<String> symbols;
     
     public Parser(Scanner scanner, Queue<Token> queue) {
@@ -33,7 +33,7 @@ public class Parser {
         this.symbols = new ArrayList<String>();
     }
 
-    public HttpRequestObject parse() throws FailureException {
+    public HttpRequestBuilder parse() throws FailureException {
         run();
         httpMethod = symbols.get(0);
         path = symbols.get(1);
@@ -44,19 +44,11 @@ public class Parser {
             i = i + 2;
         }
         
-        int iterator = scanner.getContext();
-        String context = scanner.consumeContext();
-        context = context.substring(iterator);
-        scanner.nextContext();
-        body = context + scanner.consumeContext();
-
         return HttpRequestObject.builder()
-            .withBody(body)
             .withHeaders(headers)
             .withHttpMethod(httpMethod)
             .withHttpVersion(version)
-            .withPath(path)
-            .build();
+            .withPath(path);
     }
 
     private void act(Token token) {

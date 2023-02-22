@@ -8,10 +8,6 @@ import Tracker.BusinessLogic.Utiles.HttpResponseBuilder;
 public class RequestHandler {
 
     public HttpResponse handleRequest(HttpRequestObject httpRequest) {
-        System.out.println(httpRequest.getHttpMethod());
-        System.out.println(httpRequest.getPath());
-        System.out.println(httpRequest.getHttpVersion());
-        System.out.println(httpRequest.getHeaders().toString());
         if (httpRequest.getHttpMethod().equals("GET")) {
             return handleGet(httpRequest);
         }

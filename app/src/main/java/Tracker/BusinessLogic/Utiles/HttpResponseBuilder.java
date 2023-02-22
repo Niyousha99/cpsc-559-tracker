@@ -38,6 +38,7 @@ public class HttpResponseBuilder<T> {
         headers.put("Date", getUpdatedDate());
         headers.put("Server", SERVER_NAME);
         headers.put("Content-Length", "0");
+        headers.put("Connection", "close");
     }
 
     private String getUpdatedDate() {
@@ -62,6 +63,9 @@ public class HttpResponseBuilder<T> {
      public HttpResponseBuilder<T> withBody(T body) {
         this.body = body;
         headers.put("Content-Length", "" + body.toString().length());
+        if (body instanceof String) {
+            headers.put("Content-Type", "text");
+        }
         return this;
     }
 

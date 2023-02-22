@@ -26,6 +26,7 @@ public class Scanner {
     private int limit;
     private String context;
     private String tmp;
+    private boolean inputDone;
 
     public Scanner(DataInputStream input, Queue<Token> queue) {
         this.input = input;
@@ -34,6 +35,7 @@ public class Scanner {
         this.iterator = 0;
         this.limit = 0;
         this.context = "";
+        this.inputDone = false;
 
         this.isSpace = new HashMap<Character, Boolean>();
         this.isSpace.put((char) 32, true);
@@ -49,7 +51,10 @@ public class Scanner {
     }
 
     public String consumeContext() {
-        String res = context;
+        if (context == null) {
+            return "";
+        }
+        String res = new String(context);
         context = null;
         return res;
     }
@@ -137,6 +142,9 @@ public class Scanner {
     }
 
     public void nextContext() {
+        if (inputDone) {
+            return;
+        }
         int readBytes = -1;
         try {
             if ((readBytes = input.read(buffer)) != -1) {
@@ -151,10 +159,15 @@ public class Scanner {
 
                 limit = context.length();                
             }
+
+            else {
+                inputDone = true;
+                context = "";
+            }
         }
 
         catch (Exception e) {
-
+            inputDone = true;
         }
     }
 }

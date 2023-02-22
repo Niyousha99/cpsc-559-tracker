@@ -42,7 +42,7 @@ public class HttpResponse<T> {
 
     @Override
     public String toString() {
-        String res = statusCode + " " + status + CRLF;
+        String res = "HTTP/1.1 " + statusCode + " " + status + CRLF;
         for (String key : headers.keySet().stream().collect(Collectors.toList())) {
             res = res + key + ": " + headers.get(key) + CRLF;
         }
