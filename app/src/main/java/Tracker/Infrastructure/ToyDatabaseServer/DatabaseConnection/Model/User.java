@@ -1,4 +1,4 @@
-package Tracker.Infrastructure.Database.DatabaseConnection.Model;
+package Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.Model;
 
 public class User {
     private final String ipAddress;

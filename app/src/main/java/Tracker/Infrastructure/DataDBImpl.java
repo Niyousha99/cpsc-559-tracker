@@ -1,7 +1,7 @@
 package Tracker.Infrastructure;
 
-import Tracker.Infrastructure.Database.DatabaseConnection.DatabaseConnection;
-import Tracker.BusinessLogic.DataDB;;
+import Tracker.BusinessLogic.DataDB;
+import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.DatabaseConnection;;
 
 public class DataDBImpl implements DataDB {
     private final DatabaseConnection connection;
@@ -10,6 +10,6 @@ public class DataDBImpl implements DataDB {
         this.connection = connection;
     }
 
-    
+
     
 }

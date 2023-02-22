@@ -1,10 +1,10 @@
-package Tracker.Infrastructure.Utils.Parsing.Actions;
+package Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import Tracker.Infrastructure.Utils.Parsing.Token;
-import Tracker.Infrastructure.Utils.Parsing.TokenIdentifier;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Token;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.TokenIdentifier;
 
 public class S_Action implements Action {
     boolean done = false;

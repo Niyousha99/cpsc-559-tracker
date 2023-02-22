@@ -1,12 +1,12 @@
-package Tracker.Infrastructure.Utils.Parsing;
+package Tracker.Infrastructure.HttpServer.Parsing.Parsing;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import Tracker.Infrastructure.Utils.Parsing.Actions.Action;
-import Tracker.Infrastructure.Utils.Parsing.Actions.ActionBuilder;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions.Action;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions.ActionBuilder;
 
 public class NonTerminal<T extends Action> implements Production {
     private HashMap<TokenIdentifier, ArrayList<Grammer>> productions;

@@ -12,10 +12,10 @@ import java.util.Queue;
 import Tracker.BusinessLogic.HttpRequestObject;
 import Tracker.BusinessLogic.HttpResponse;
 import Tracker.BusinessLogic.Utiles.HttpRequestBuilder;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Parser;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Scanner;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Token;
 import Tracker.Infrastructure.Utils.FailureException;
-import Tracker.Infrastructure.Utils.Parsing.Parser;
-import Tracker.Infrastructure.Utils.Parsing.Scanner;
-import Tracker.Infrastructure.Utils.Parsing.Token;
 
 public class HttpConnection {
     private final Socket socket;

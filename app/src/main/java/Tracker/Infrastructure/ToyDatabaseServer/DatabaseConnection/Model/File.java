@@ -1,4 +1,4 @@
-package Tracker.Infrastructure.Database.Model;
+package Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.Model;
 
 import java.util.ArrayList;
 
@@ -24,7 +24,6 @@ public class File {
     public ArrayList<String> getOwners() {
         return this.owners;
     }
-
 
     public void setOwners(ArrayList<String> owners) {
         this.owners = owners;

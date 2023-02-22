@@ -9,8 +9,8 @@ import java.util.HashMap;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
-import Tracker.Infrastructure.Database.DatabaseConnection.DatabaseConnectionManager;
 import Tracker.Infrastructure.HttpServer.Server;
+import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.DatabaseConnectionManager;
 
 public class App {
     public String getGreeting() {

@@ -1,11 +1,11 @@
-package Tracker.Infrastructure.Utils.Parsing;
+package Tracker.Infrastructure.HttpServer.Parsing.Parsing;
 
 import java.util.Stack;
 
 import Tracker.BusinessLogic.HttpRequestObject;
 import Tracker.BusinessLogic.Utiles.HttpRequestBuilder;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions.Action;
 import Tracker.Infrastructure.Utils.FailureException;
-import Tracker.Infrastructure.Utils.Parsing.Actions.Action;
 
 import java.io.DataInputStream;
 import java.util.ArrayList;

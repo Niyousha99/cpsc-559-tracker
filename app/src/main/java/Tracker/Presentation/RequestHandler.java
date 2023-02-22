@@ -6,8 +6,8 @@ import Tracker.BusinessLogic.HttpRequestObject;
 import Tracker.BusinessLogic.HttpResponse;
 import Tracker.BusinessLogic.Utiles.HttpResponseBuilder;
 import Tracker.Infrastructure.DataDBImpl;
-import Tracker.Infrastructure.Database.DatabaseConnection.DatabaseConnection;
-import Tracker.Infrastructure.Database.DatabaseConnection.DatabaseConnectionManager;
+import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.DatabaseConnection;
+import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.DatabaseConnectionManager;
 
 public class RequestHandler {
     private final DataDB dataDB;

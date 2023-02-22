@@ -1,9 +1,9 @@
-package Tracker.Infrastructure.Database.DatabaseConnection;
+package Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import Tracker.Infrastructure.Database.DatabaseEngine;
+import Tracker.Infrastructure.ToyDatabaseServer.DatabaseEngine;
 import Tracker.Infrastructure.Utils.Result;
 
 public class DatabaseConnection {

@@ -1,4 +1,4 @@
-package Tracker.Infrastructure.Database;
+package Tracker.Infrastructure.ToyDatabaseServer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import Tracker.Infrastructure.Database.Model.File;
-import Tracker.Infrastructure.Database.Model.User;
+import Tracker.Infrastructure.ToyDatabaseServer.Model.File;
+import Tracker.Infrastructure.ToyDatabaseServer.Model.User;
 import Tracker.Infrastructure.Utils.Result;
 
 public final class DatabaseEngine {

@@ -1,4 +1,4 @@
-package Tracker.Infrastructure.Utils.Parsing;
+package Tracker.Infrastructure.HttpServer.Parsing.Parsing;
 
 import java.util.ArrayList;
 

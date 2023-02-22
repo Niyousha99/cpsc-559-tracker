@@ -1,4 +1,4 @@
-package Tracker.Infrastructure.Database.DatabaseConnection.Model;
+package Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.Model;
 
 import java.util.ArrayList;
 

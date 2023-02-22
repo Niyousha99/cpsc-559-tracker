@@ -1,4 +1,4 @@
-package Tracker.Infrastructure.Utils.Parsing;
+package Tracker.Infrastructure.HttpServer.Parsing.Parsing;
 
 public class Token implements Grammer {
     private final TokenIdentifier identifier;

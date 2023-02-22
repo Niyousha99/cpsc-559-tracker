@@ -1,4 +1,4 @@
-package Tracker.Infrastructure.Utils.Parsing.Actions;
+package Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions;
 
 import java.util.function.Supplier;
 

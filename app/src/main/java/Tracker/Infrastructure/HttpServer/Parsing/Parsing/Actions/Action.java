@@ -1,8 +1,8 @@
-package Tracker.Infrastructure.Utils.Parsing.Actions;
+package Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions;
 
 import java.util.ArrayList;
 
-import Tracker.Infrastructure.Utils.Parsing.Token;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Token;
 
 public interface Action  {
 

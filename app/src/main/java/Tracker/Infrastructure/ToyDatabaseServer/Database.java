@@ -1,9 +1,9 @@
-package Tracker.Infrastructure.Database;
+package Tracker.Infrastructure.ToyDatabaseServer;
 
 import java.util.ArrayList;
 
-import Tracker.Infrastructure.Database.Model.User;
-import Tracker.Infrastructure.Database.Model.File;
+import Tracker.Infrastructure.ToyDatabaseServer.Model.File;
+import Tracker.Infrastructure.ToyDatabaseServer.Model.User;
 
 public final class Database {
     private final ArrayList<User> users;

@@ -1,4 +1,4 @@
-package Tracker.Infrastructure.Utils.Parsing;
+package Tracker.Infrastructure.HttpServer.Parsing.Parsing;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import Tracker.Infrastructure.Utils.Parsing.Actions.C_Action;
-import Tracker.Infrastructure.Utils.Parsing.Actions.H_Action;
-import Tracker.Infrastructure.Utils.Parsing.Actions.S2_Action;
-import Tracker.Infrastructure.Utils.Parsing.Actions.S_Action;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions.C_Action;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions.H_Action;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions.S2_Action;
+import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions.S_Action;
 
 public class HttpRequestContext {
 
