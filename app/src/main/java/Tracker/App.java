@@ -6,6 +6,10 @@ package Tracker;
 import java.io.*;
 import java.util.HashMap;
 
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+
+import Tracker.Infrastructure.Database.DatabaseConnection.DatabaseConnectionManager;
 import Tracker.Infrastructure.HttpServer.Server;
 
 public class App {
@@ -13,11 +17,22 @@ public class App {
         return "Hello World!";
     }
 
+	// MAKE SURE YOU CHANGE THIS TO PATH 
+	private static final String DATABASE = "/Users/armeenrashidian/Documents/cpsc557/Tracker/app/src/main/resources/Database.txt";
+
     public static void main(String[] args) {
         HashMap<String, String> params = parseCommandLine(args);
         int serverPort = Integer.parseInt( params.getOrDefault("-p", "2025") ); // server port number
         System.out.println("starting the server on port " + serverPort);
         Server server = new Server(serverPort);
+		// initialize database
+		try {
+			DatabaseConnectionManager.initialize(DATABASE);
+		} catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Can't connect to database");
+			e.printStackTrace();
+		}
 		server.listen();
     }
 

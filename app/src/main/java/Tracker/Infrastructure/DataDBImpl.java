@@ -1,6 +1,15 @@
 package Tracker.Infrastructure;
 
-public class DataDBImpl {
-    public static String PATH_TO_TEXT_FILE;
+import Tracker.Infrastructure.Database.DatabaseConnection.DatabaseConnection;
+import Tracker.BusinessLogic.DataDB;;
+
+public class DataDBImpl implements DataDB {
+    private final DatabaseConnection connection;
+
+    public DataDBImpl(DatabaseConnection connection) {
+        this.connection = connection;
+    }
+
+    
     
 }
