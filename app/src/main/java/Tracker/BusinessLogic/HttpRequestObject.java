@@ -10,10 +10,10 @@ public class HttpRequestObject {
     private final String httpMethod;
     private final String path;
     private final String httpVersion;
-    private final Map<String, ArrayList<String>> headers;
+    private final Map<String, String> headers;
     private final String body;
 
-    public HttpRequestObject(String httpMethod, String path, String httpVersion, Map<String, ArrayList<String>> headers, String body) {
+    public HttpRequestObject(String httpMethod, String path, String httpVersion, Map<String, String> headers, String body) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.httpVersion = httpVersion;
@@ -37,7 +37,7 @@ public class HttpRequestObject {
         return this.httpVersion;
     }
 
-    public Map<String, ArrayList<String>> getHeaders() {
+    public Map<String, String> getHeaders() {
         return this.headers;
     }
 

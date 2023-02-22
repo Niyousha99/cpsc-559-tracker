@@ -3,17 +3,14 @@ package Tracker.Infrastructure.Utils.Parsing.Actions;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import Tracker.Infrastructure.Utils.Parsing.Action;
 import Tracker.Infrastructure.Utils.Parsing.Token;
 import Tracker.Infrastructure.Utils.Parsing.TokenIdentifier;
 
 public class H_Action implements Action {
     boolean done = false;
-    boolean firstTime = true;
-
     String fieldName = null;
-    String fieldValue = null;
 
+    private H_Action() {} 
 
     @Override
     public boolean isDone() {
@@ -22,34 +19,30 @@ public class H_Action implements Action {
 
     @Override
     public void act(Token token) {
-        if (firstTime && token.getIdentifier().equals(TokenIdentifier.EOF)) {
+        if (token.getIdentifier().equals(TokenIdentifier.CRLF)) {
             done = true;
-            return;
         }
 
-        firstTime = false;
-
-        if (fieldName == null)  {
-            if (token.getIdentifier().equals(TokenIdentifier.WORD)) {
-                fieldName = token.getLexeme();
-            }
-        }
-
-        else if (fieldValue == null) {
-            if (token.getIdentifier().equals(TokenIdentifier.WORD)) {
-                fieldValue = token.getLexeme();
-                done = true;
-            }
-        }
-
+        else if (token.getIdentifier().equals(TokenIdentifier.WORD)) {
+            fieldName = token.getLexeme();
+            done = true;
+        }    
     }
 
     @Override
     public ArrayList<String> collect() {
-        if (fieldName != null && fieldValue != null) { 
-            return new ArrayList<String>(Arrays.asList(fieldName, fieldName));
+        if (fieldName != null) { 
+            return new ArrayList<String>(Arrays.asList(fieldName));
         }
         return null;
+    }
+
+    public static Action generate() {
+        return new H_Action();
+    }
+
+    public static ActionBuilder<H_Action> getBuilder() {
+        return new ActionBuilder<H_Action>(H_Action::new);
     }
     
 }

@@ -13,7 +13,7 @@ public class HttpRequestBuilder {
     private String httpMethod;
     private String path;
     private String httpVersion;
-    private Map<String, ArrayList<String>> headers;
+    private Map<String, String> headers;
     private String body;
 
     private static final Map<String, Boolean> acceptedMethods = Map.ofEntries(
@@ -46,7 +46,7 @@ public class HttpRequestBuilder {
         return this;
     }
 
-    public HttpRequestBuilder withHeaders(Map<String, ArrayList<String>> headers) {
+    public HttpRequestBuilder withHeaders(Map<String, String> headers) {
         this.headers = headers;
         return this;
     }
@@ -67,8 +67,8 @@ public class HttpRequestBuilder {
             }
         }
 
-        ArrayList<String> hosts = headers.getOrDefault("Host", null);
-        if (hosts == null || hosts.isEmpty()) {
+        String host = headers.getOrDefault("Host", null);
+        if (host == null || host.isEmpty()) {
             throw new FailureException();
         }
 

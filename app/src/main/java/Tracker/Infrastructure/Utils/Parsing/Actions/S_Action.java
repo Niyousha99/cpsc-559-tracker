@@ -3,7 +3,6 @@ package Tracker.Infrastructure.Utils.Parsing.Actions;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import Tracker.Infrastructure.Utils.Parsing.Action;
 import Tracker.Infrastructure.Utils.Parsing.Token;
 import Tracker.Infrastructure.Utils.Parsing.TokenIdentifier;
 
@@ -12,6 +11,8 @@ public class S_Action implements Action {
     String httpMethod = null;
     String path = null;
     String version = null;
+
+    private S_Action() {}
 
     @Override
     public boolean isDone() {
@@ -41,5 +42,13 @@ public class S_Action implements Action {
     @Override
     public ArrayList<String> collect() {
         return new ArrayList<String>(Arrays.asList(httpMethod, path, version));
+    }
+
+    public static Action generate() {
+        return new S_Action();
+    }
+
+    public static ActionBuilder<S_Action> getBuilder() {
+        return new ActionBuilder<S_Action>(S_Action::new);
     }
 }

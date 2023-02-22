@@ -17,10 +17,6 @@ public class Token implements Grammer {
         return this.identifier;
     }
 
-    @Override
-    public int hashCode() {
-        return this.getIdentifier().hashCode();
-    }  
 }
 
 

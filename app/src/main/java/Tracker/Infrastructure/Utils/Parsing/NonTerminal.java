@@ -5,28 +5,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NonTerminal implements Production {
-    private Map<Token, ArrayList<Grammer>> productions;
-    private Action action;
+import Tracker.Infrastructure.Utils.Parsing.Actions.Action;
+import Tracker.Infrastructure.Utils.Parsing.Actions.ActionBuilder;
+
+public class NonTerminal<T extends Action> implements Production {
+    private HashMap<TokenIdentifier, ArrayList<Grammer>> productions;
+    private final ActionBuilder<T> actionBuilder;
     
-    public NonTerminal() {
+    public NonTerminal(ActionBuilder<T> actionBuilder) {
+        this.actionBuilder = actionBuilder;
     }
 
-    public void setProductions(Map<Token, ArrayList<Grammer>> productions) {
+    public void setProductions(HashMap<TokenIdentifier, ArrayList<Grammer>> productions) {
         this.productions = productions;
     }
 
-    public void setAction(Action action) {
-        this.action = action;
-    }
-
-    public Action releaseAction() {
-        return this.action;
+    public Action generateAction() {
+        return this.actionBuilder.build();
     }
 
     @Override
     public ArrayList<Grammer> produce(Token token) {
-        return productions.getOrDefault(token, null);
+        return productions.getOrDefault(token.getIdentifier(), productions.get(TokenIdentifier.EOF));
     }
 
 

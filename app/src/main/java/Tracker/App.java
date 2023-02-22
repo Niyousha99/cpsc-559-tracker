@@ -18,7 +18,7 @@ public class App {
         int serverPort = Integer.parseInt( params.getOrDefault("-p", "2025") ); // server port number
         System.out.println("starting the server on port " + serverPort);
         Server server = new Server(serverPort);
-		server.run();
+		server.listen();
     }
 
     	// parse command line arguments
