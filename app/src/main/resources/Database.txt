@@ -6,19 +6,25 @@
 
         {
             "ipAddress": "123.1.3.1"
+        },
+
+        {
+            "ipAddress": "localhost:2000"
         }
     ],
     "files": [
         {
             "filename": "example1.txt",
-            "hash": "iehfskefhw4t"
-            "owners": ["135.111.0.3", "002.421.111"]
+            "hash": "iehfskefhw4t",
+            "size": "123123123",
+            "owners": ["123.1.3.1", "172.0.0.1"]
         },
 
         {
             "filename": "example2.txt",
-            "hash": "ksjfkjktjkejf"
-            "owners": ["135.111.0.3"]
-        },
+            "hash": "ksjfkjktjkejf",
+            "size": "11",
+            "owners": ["123.1.3.1", "localhost:2000"]
+        }
     ]
 }
