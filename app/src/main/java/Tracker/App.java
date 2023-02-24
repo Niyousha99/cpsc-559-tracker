@@ -4,6 +4,7 @@
 package Tracker;
 
 import java.io.*;
+import java.nio.file.FileSystems;
 import java.util.HashMap;
 
 import com.google.gson.JsonIOException;
@@ -13,28 +14,31 @@ import Tracker.Infrastructure.HttpServer.Server;
 import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.DatabaseConnectionManager;
 
 public class App {
-    public String getGreeting() {
+	private static String databasePath;
+
+	public String getGreeting() {
         return "Hello World!";
     }
 
-	// MAKE SURE YOU CHANGE THIS TO PATH 
-	private static final String DATABASE = "/Users/armeenrashidian/Documents/cpsc557/Tracker/app/src/main/resources/Database.txt";
+	public static void main(String[] args) {
+		HashMap<String, String> params = parseCommandLine(args);
+		databasePath = params.getOrDefault("-d", FileSystems.getDefault().getPath("").toAbsolutePath() + "/Database.txt");
+		int serverPort = Integer.parseInt(params.getOrDefault("-p", "2025")); // server port number
 
-    public static void main(String[] args) {
-        HashMap<String, String> params = parseCommandLine(args);
-        int serverPort = Integer.parseInt( params.getOrDefault("-p", "2025") ); // server port number
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> DatabaseConnectionManager.shutdown(databasePath)));
+
         System.out.println("starting the server on port " + serverPort);
-        Server server = new Server(serverPort);
+		Server server = new Server(serverPort);
 		// initialize database
 		try {
-			DatabaseConnectionManager.initialize(DATABASE);
+			DatabaseConnectionManager.initialize(databasePath);
 		} catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Can't connect to database");
 			e.printStackTrace();
 		}
 		server.listen();
-    }
+	}
 
     	// parse command line arguments
 	private static HashMap<String, String> parseCommandLine(String[] args) {
@@ -45,7 +49,7 @@ public class App {
 			params.put(args[i], args[i+1]);
 			i += 2;
 		}
-		
+
 		return params;
 	}
 }
