@@ -3,7 +3,6 @@ package Tracker.Infrastructure.ToyDatabaseServer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import Tracker.Infrastructure.ToyDatabaseServer.Model.File;
@@ -46,6 +45,16 @@ public final class DatabaseEngine {
         );
     }
 
+    public static synchronized ArrayList<File> getFiles()
+    {
+        return database.getFiles();
+    }
+
+    public static synchronized File getFile(String name)
+    {
+        return FILES.get(name);
+    }
+
     public static synchronized Result<ArrayList> getObject(String objectType, HashMap<String, String> kv) {
         objectType = new String(objectType);
         if (objectType.equals("user")) {
@@ -64,7 +73,7 @@ public final class DatabaseEngine {
     }
 
     public static synchronized int addNewUser(String ipAddress) {
-        
+
         ipAddress = new String(ipAddress);
 
         if (USERS.get(ipAddress) != null) {
@@ -78,7 +87,29 @@ public final class DatabaseEngine {
         return 0;
     }
 
-    public static synchronized int addNewFile(String filename, String hash, ArrayList<String> owners) {
+    public static synchronized int removeUser(final String ipAddress) {
+        if (USERS.get(ipAddress) == null) {
+            return -1;
+        }
+
+        database.getUsers().removeIf(user -> (user.getIpAddress().equalsIgnoreCase(ipAddress)));
+        database.getFiles().forEach(file -> file.getOwners().removeIf(owner -> (owner.equalsIgnoreCase(ipAddress))));
+        USER_FILES.remove(ipAddress);
+        FILE_OWNERS.forEach((file, owner) -> owner.remove(ipAddress));
+        USERS.remove(ipAddress);
+        return 0;
+    }
+
+    public static synchronized int addFiles(ArrayList<File> newFiles, String ipAddress)
+    {
+        // Needs to be fixed / changed
+        newFiles.forEach(newFile -> {
+            addNewFile(newFile.getFilename(), newFile.getHash(), newFile.getSize(), newFile.getOwners());
+        });
+        return 0;
+    }
+
+    public static synchronized int addNewFile(String filename, String hash, long size, ArrayList<String> owners) {
         filename= new String(filename);
         if (FILES.get(filename) != null) {
             return -1;
@@ -101,11 +132,11 @@ public final class DatabaseEngine {
             return -1;
         }
 
-        File file = new File(filename, hash, owners);
+        File file = new File(filename, hash, size, owners);
         database.getFiles().add(file);
         FILES.put(file.getFilename(), file);
         FILE_OWNERS.put(file.getFilename(), new HashMap<String, Boolean>());
-        
+
         file.getOwners().forEach(
             (ipAddress) -> {
                 FILE_OWNERS.get(file.getFilename()).put(ipAddress, true);
@@ -145,7 +176,7 @@ public final class DatabaseEngine {
                 FILE_OWNERS.get(filename).put(ipAddress, false);
                 USER_FILES.get(ipAddress).put(filename, false);
             }
-        ); 
+        );
 
        FILES.get(filename).setOwners(new ArrayList<String>(FILES.get(filename).getOwners().stream().filter(
             (ipAddress) -> {
