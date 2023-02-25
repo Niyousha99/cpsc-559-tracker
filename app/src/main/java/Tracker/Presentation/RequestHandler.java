@@ -101,10 +101,13 @@ public class RequestHandler
     private HttpResponse getFile(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /getFile endpoint");
-        File result = dataDB.getFile(requestParameters.get("hash"));
-        if (result != null)
-            return successResponse.withBody("{\n\"peers\": " + new GsonBuilder().setPrettyPrinting().create().toJson(dataDB.getFile(requestParameters.get("hash")).owners()) + "\n}").build();
-        else return serverErrorResponse.build();
+        File file = dataDB.getFile(requestParameters.get("hash"));
+        if (file != null)
+        {
+            File strippedFile = new File(file.filename(), file.hash(), file.size(), new ArrayList<User>());
+            file.owners().forEach(owner -> strippedFile.owners().add(new User(owner.ipAddress().replaceAll(":.*", ""))));
+            return successResponse.withBody("{\n\"peers\": " + new GsonBuilder().setPrettyPrinting().create().toJson(strippedFile.owners()) + "\n}").build();
+        } else return serverErrorResponse.build();
     }
 
     private HttpResponse removeOwner(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
