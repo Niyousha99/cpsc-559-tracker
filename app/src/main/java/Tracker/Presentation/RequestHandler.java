@@ -88,10 +88,14 @@ public class RequestHandler
     private HttpResponse getFiles(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /getFiles endpoint");
-        ArrayList<File> result = dataDB.getFiles();
-        if (result != null)
-            return successResponse.withBody("{\n\"files\": " + new GsonBuilder().setPrettyPrinting().create().toJson(dataDB.getFiles()) + "\n}").build();
-        else return serverErrorResponse.build();
+        record StrippedFile(String filename, String hash, long size) {}
+        ArrayList<StrippedFile> strippedFiles = new ArrayList<>();
+
+        if (dataDB.getFiles() != null)
+        {
+            dataDB.getFiles().forEach(file -> strippedFiles.add(new StrippedFile(file.filename(), file.hash(), file.size())));
+            return successResponse.withBody("{\n\"files\": " + new GsonBuilder().setPrettyPrinting().create().toJson(strippedFiles) + "\n}").build();
+        } else return serverErrorResponse.build();
     }
 
     private HttpResponse getFile(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
