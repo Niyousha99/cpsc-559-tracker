@@ -31,7 +31,7 @@ public class App
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> DatabaseConnectionManager.shutdown(databasePath)));
 
-        System.out.println("starting the server on port " + serverPort);
+        System.out.println("Starting the server on port " + serverPort);
         Server server = new Server(serverPort);
         // initialize database
         try

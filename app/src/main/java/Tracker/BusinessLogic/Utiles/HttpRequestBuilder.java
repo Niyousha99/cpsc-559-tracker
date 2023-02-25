@@ -71,7 +71,7 @@ public class HttpRequestBuilder {
             }
         }
 
-        String host = headers.getOrDefault("Host", null);
+        String host = headers.getOrDefault("Host", headers.getOrDefault("host", null));
         if (host == null || host.isEmpty()) {
             throw new FailureException();
         }
