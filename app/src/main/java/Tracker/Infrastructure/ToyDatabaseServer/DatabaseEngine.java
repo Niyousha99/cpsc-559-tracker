@@ -13,6 +13,7 @@ public final class DatabaseEngine
     public static synchronized void setDatabase(Database db)
     {
         database = db;
+        purgeUnavailableFiles();
     }
 
     private static <T> T deepClone(T input)
@@ -29,12 +30,24 @@ public final class DatabaseEngine
 
     public static synchronized ArrayList<File> getFiles()
     {
-        return new ArrayList<File>(deepClone(database).files().values());
+        try
+        {
+            return new ArrayList<File>(deepClone(database).files().values());
+        } catch (Exception exception)
+        {
+            return null;
+        }
     }
 
     public static synchronized File getFile(String hash)
     {
-        return deepClone(database).files().get(hash);
+        try
+        {
+            return deepClone(database).files().get(hash);
+        } catch (Exception exception)
+        {
+            return null;
+        }
     }
 
     public static synchronized int addUser(String ipAddress)
@@ -55,6 +68,7 @@ public final class DatabaseEngine
         {
             database.files().forEach((hash, file) -> file.owners().remove(database.users().get(ipAddress)));
             database.users().remove(ipAddress);
+            purgeUnavailableFiles();
             return 0;
         } catch (Exception exception)
         {
@@ -67,6 +81,7 @@ public final class DatabaseEngine
         try
         {
             database.files().get(hash).owners().remove(database.users().get(ipAddress));
+            purgeUnavailableFiles();
             return 0;
         } catch (Exception exception)
         {
@@ -76,17 +91,32 @@ public final class DatabaseEngine
 
     public static synchronized int addFiles(String ipAddress, ArrayList<File> newFiles)
     {
-        newFiles.forEach(newFile -> {
-            if (database.files().containsKey(newFile.hash()))
-            {
-                if (!database.files().get(newFile.hash()).owners().contains(database.users().get(ipAddress)))
-                    database.files().get(newFile.hash()).owners().add(database.users().get(ipAddress));
-            } else
-            {
-                database.files().put(newFile.hash(), newFile);
-                newFile.owners().add(database.users().get(ipAddress));
-            }
+        try
+        {
+            if (database.users().get(ipAddress) == null) return -1;
+
+            newFiles.forEach(newFile -> {
+                if (database.files().containsKey(newFile.hash()))
+                {
+                    if (!database.files().get(newFile.hash()).owners().contains(database.users().get(ipAddress)))
+                        database.files().get(newFile.hash()).owners().add(database.users().get(ipAddress));
+                } else
+                {
+                    database.files().put(newFile.hash(), newFile);
+                    newFile.owners().add(database.users().get(ipAddress));
+                }
+            });
+            return 0;
+        } catch (Exception exception)
+        {
+            return -1;
+        }
+    }
+
+    private static synchronized void purgeUnavailableFiles()
+    {
+        database.files().forEach((hash, file) -> {
+            if (file.owners().isEmpty()) database.files().remove(hash);
         });
-        return 0;
     }
 }
