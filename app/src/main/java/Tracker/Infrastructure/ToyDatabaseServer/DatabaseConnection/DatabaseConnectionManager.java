@@ -4,6 +4,7 @@ import Tracker.Infrastructure.ToyDatabaseServer.Database;
 import Tracker.Infrastructure.ToyDatabaseServer.DatabaseEngine;
 import Tracker.Infrastructure.ToyDatabaseServer.Model.File;
 import Tracker.Infrastructure.ToyDatabaseServer.Model.User;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
@@ -18,11 +19,14 @@ public class DatabaseConnectionManager
 {
     private static Database database;
 
-    public static void initialize(String path) throws JsonIOException, JsonSyntaxException, FileNotFoundException
+    public static void initialize(String path, boolean cleanDB) throws JsonIOException, JsonSyntaxException, FileNotFoundException
     {
-        Database databaseModel = DatabaseBuilder.buildDatabase(path);
+        Database databaseModel;
         ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
         ConcurrentHashMap<String, File> files = new ConcurrentHashMap<>();
+
+        if (cleanDB) databaseModel = new Gson().fromJson("{\"users\":{},\"files\":{}}", Database.class);
+        else databaseModel = DatabaseBuilder.buildDatabase(path);
 
         databaseModel.files().forEach((hash, file) -> {
             ArrayList<User> owners = new ArrayList<User>();
