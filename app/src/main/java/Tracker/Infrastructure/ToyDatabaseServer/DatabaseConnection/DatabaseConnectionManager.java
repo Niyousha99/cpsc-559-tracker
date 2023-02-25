@@ -47,7 +47,7 @@ public class DatabaseConnectionManager
     {
         try
         {
-            FileWriter fileWriter = new FileWriter(path.substring(0, path.length() - 4) + " Modified.txt");
+            FileWriter fileWriter = new FileWriter(path);
             fileWriter.write(new GsonBuilder().setPrettyPrinting().create().toJson(database));
             fileWriter.close();
         } catch (IOException e)
