@@ -2,23 +2,14 @@ package Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection;
 
 import Tracker.Infrastructure.ToyDatabaseServer.DatabaseEngine;
 import Tracker.Infrastructure.ToyDatabaseServer.Model.File;
-import Tracker.Infrastructure.Utils.Result;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-public class DatabaseConnection {
-
-    private DatabaseConnection() {
-
-    }
-
-    public static DatabaseConnection getConnection() {
+public class DatabaseConnection
+{
+    public static DatabaseConnection getConnection()
+    {
         return new DatabaseConnection();
-    }
-
-    public Result<ArrayList> getObject(String objectType, HashMap<String, String> keyAttributePair) {
-       return DatabaseEngine.getObject(objectType, keyAttributePair);
     }
 
     public ArrayList<File> getFiles()
@@ -26,14 +17,14 @@ public class DatabaseConnection {
         return DatabaseEngine.getFiles();
     }
 
-    public File getFile(String name)
+    public File getFile(String hash)
     {
-        return DatabaseEngine.getFile(name);
+        return DatabaseEngine.getFile(hash);
     }
 
-    public int addNewUser(String ipAddress)
+    public int addUser(String ipAddress)
     {
-        return DatabaseEngine.addNewUser(ipAddress);
+        return DatabaseEngine.addUser(ipAddress);
     }
 
     public int removeUser(String ipAddress)
@@ -41,8 +32,13 @@ public class DatabaseConnection {
         return DatabaseEngine.removeUser(ipAddress);
     }
 
-    public int addFiles(ArrayList<File> newFiles, String ipAddress)
+    public int removeOwner(String ipAddress, String hash)
     {
-        return DatabaseEngine.addFiles(newFiles, ipAddress);
+        return DatabaseEngine.removeOwner(ipAddress, hash);
+    }
+
+    public int addFiles(String ipAddress, ArrayList<File> newFiles)
+    {
+        return DatabaseEngine.addFiles(ipAddress, newFiles);
     }
 }

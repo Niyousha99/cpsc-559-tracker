@@ -6,13 +6,15 @@ import java.util.ArrayList;
 
 public interface DataDB
 {
-    public int join(String ipAddress);
+    int join(String ipAddress);
 
-    public int exit(String ipAddress);
+    int exit(String ipAddress);
 
-    public ArrayList<File> getFiles();
+    ArrayList<File> getFiles();
 
-    public File getFile(String name);
+    File getFile(String name);
 
-    public int upload(ArrayList<File> mewFiles, String ipAddress);
+    int removeOwner(String ipAddress, String hash);
+
+    int upload(String ipAddress, ArrayList<File> newFiles);
 }

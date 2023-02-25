@@ -1,40 +1,45 @@
 package Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection;
 
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-
+import Tracker.Infrastructure.ToyDatabaseServer.Database;
+import Tracker.Infrastructure.ToyDatabaseServer.DatabaseEngine;
+import Tracker.Infrastructure.ToyDatabaseServer.Model.File;
+import Tracker.Infrastructure.ToyDatabaseServer.Model.User;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
-import Tracker.Infrastructure.ToyDatabaseServer.DatabaseEngine;
-import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.Model.Database;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class DatabaseConnectionManager  {
-    private DatabaseConnectionManager() {}
+public class DatabaseConnectionManager
+{
+    private static Database database;
 
-    private static Tracker.Infrastructure.ToyDatabaseServer.Database database;
-
-    public static void initialize(String path) throws JsonIOException, JsonSyntaxException, FileNotFoundException {
+    public static void initialize(String path) throws JsonIOException, JsonSyntaxException, FileNotFoundException
+    {
         Database databaseModel = DatabaseBuilder.buildDatabase(path);
-        ArrayList<Tracker.Infrastructure.ToyDatabaseServer.Model.User> users  = new ArrayList<>();
-        ArrayList<Tracker.Infrastructure.ToyDatabaseServer.Model.File> files  = new ArrayList<>();
+        ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, File> files = new ConcurrentHashMap<>();
 
-        databaseModel.getUsers().forEach(
-            (user) -> {
-                users.add(new Tracker.Infrastructure.ToyDatabaseServer.Model.User(user.getIpAddress()));
-            }
-        );
+        databaseModel.files().forEach((hash, file) -> {
+            ArrayList<User> owners = new ArrayList<User>();
+            files.put(file.hash(), new File(file.filename(), file.hash(), file.size(), owners));
+            file.owners().forEach(owner -> {
+                if (users.containsKey(owner.ipAddress())) owners.add(users.get(owner.ipAddress()));
+                else
+                {
+                    users.put(owner.ipAddress(), owner);
+                    owners.add(owner);
+                }
+            });
+        });
 
-        databaseModel.getFiles().forEach(
-            (file) -> {
-                files.add(new Tracker.Infrastructure.ToyDatabaseServer.Model.File(file.getFilename(), file.getHash(), file.getSize(), file.getOwners()));
-            }
-        );
+        databaseModel.users().forEach((ip, user) -> users.putIfAbsent(user.ipAddress(), user));
 
-        database = new Tracker.Infrastructure.ToyDatabaseServer.Database(users, files);
+        database = new Database(users, files);
         DatabaseEngine.setDatabase(database);
     }
 
@@ -42,29 +47,17 @@ public class DatabaseConnectionManager  {
     {
         try
         {
-            FileWriter myWriter = new FileWriter(path.substring(0, path.length() - 4) + " Modified.txt");
-            myWriter.write(new GsonBuilder().setPrettyPrinting().create().toJson(database));
-            myWriter.close();
+            FileWriter fileWriter = new FileWriter(path.substring(0, path.length() - 4) + " Modified.txt");
+            fileWriter.write(new GsonBuilder().setPrettyPrinting().create().toJson(database));
+            fileWriter.close();
         } catch (IOException e)
         {
             throw new RuntimeException(e);
         }
     }
 
-    public static DatabaseConnection getConnection() {
+    public static DatabaseConnection getConnection()
+    {
         return DatabaseConnection.getConnection();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

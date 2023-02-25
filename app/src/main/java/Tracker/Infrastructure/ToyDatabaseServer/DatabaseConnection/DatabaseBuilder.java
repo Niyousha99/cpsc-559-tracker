@@ -3,13 +3,12 @@ package Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
+import Tracker.Infrastructure.ToyDatabaseServer.Database;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
-
-import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.Model.Database;
 
 public class DatabaseBuilder {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();

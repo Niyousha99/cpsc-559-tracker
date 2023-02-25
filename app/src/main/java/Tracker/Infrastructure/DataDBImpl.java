@@ -20,16 +20,18 @@ public class DataDBImpl implements DataDB
         return connection.getFiles();
     }
 
-    public File getFile(String name)
+    public File getFile(String hash)
     {
-        return connection.getFile(name);
+        return connection.getFile(hash);
     }
 
-    public int upload(ArrayList<File> newFiles, String ipAddress) {return connection.addFiles(newFiles, ipAddress);}
+    public int removeOwner(String ipAddress, String hash) {return connection.removeOwner(ipAddress, hash);}
+
+    public int upload(String ipAddress, ArrayList<File> newFiles) {return connection.addFiles(ipAddress, newFiles);}
 
     public int join(String ipAddress)
     {
-        return connection.addNewUser(ipAddress);
+        return connection.addUser(ipAddress);
     }
 
     public int exit(String ipAddress)
