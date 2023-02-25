@@ -27,7 +27,7 @@ public class App
     {
         HashMap<String, String> params = parseCommandLine(args);
         databasePath = params.getOrDefault("-d", FileSystems.getDefault().getPath("").toAbsolutePath() + "/Database.txt");
-        int serverPort = Integer.parseInt(params.getOrDefault("-p", "2025")); // server port number
+        int serverPort = Integer.parseInt(params.getOrDefault("-p", "3001")); // server port number
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> DatabaseConnectionManager.shutdown(databasePath)));
 
