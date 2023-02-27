@@ -28,6 +28,17 @@ public final class DatabaseEngine
         }
     }
 
+    public static synchronized Database getDB()
+    {
+        try
+        {
+            return deepClone(database);
+        } catch (Exception exception)
+        {
+            return null;
+        }
+    }
+
     public static synchronized ArrayList<File> getFiles()
     {
         try

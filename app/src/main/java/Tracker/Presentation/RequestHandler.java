@@ -47,6 +47,7 @@ public class RequestHandler
     {
         return switch (requestPath[0])
                 {
+                    case "/getDB" -> getDB(httpRequest, requestPath, requestParameters);
                     case "/getFile" -> getFile(httpRequest, requestPath, requestParameters);
                     case "/getFiles" -> getFiles(httpRequest, requestPath, requestParameters);
                     default -> badRequestResponse.build();
@@ -63,6 +64,12 @@ public class RequestHandler
                     case "/exit" -> exit(httpRequest, requestPath, requestParameters);
                     default -> badRequestResponse.build();
                 };
+    }
+
+    private HttpResponse getDB(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
+    {
+        System.out.println("Called /getDB endpoint");
+        return successResponse.withBody(new GsonBuilder().setPrettyPrinting().create().toJson(dataDB.getDB())).build();
     }
 
     private HttpResponse join(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)

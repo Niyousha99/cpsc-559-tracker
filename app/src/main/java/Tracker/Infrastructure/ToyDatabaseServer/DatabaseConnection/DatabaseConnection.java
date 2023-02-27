@@ -1,5 +1,6 @@
 package Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection;
 
+import Tracker.Infrastructure.ToyDatabaseServer.Database;
 import Tracker.Infrastructure.ToyDatabaseServer.DatabaseEngine;
 import Tracker.Infrastructure.ToyDatabaseServer.Model.File;
 
@@ -10,6 +11,11 @@ public class DatabaseConnection
     public static DatabaseConnection getConnection()
     {
         return new DatabaseConnection();
+    }
+
+    public Database getDB()
+    {
+        return DatabaseEngine.getDB();
     }
 
     public ArrayList<File> getFiles()

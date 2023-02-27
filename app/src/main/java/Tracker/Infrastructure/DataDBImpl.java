@@ -1,6 +1,7 @@
 package Tracker.Infrastructure;
 
 import Tracker.BusinessLogic.DataDB;
+import Tracker.Infrastructure.ToyDatabaseServer.Database;
 import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.DatabaseConnection;
 import Tracker.Infrastructure.ToyDatabaseServer.Model.File;
 
@@ -13,6 +14,11 @@ public class DataDBImpl implements DataDB
     public DataDBImpl(DatabaseConnection connection)
     {
         this.connection = connection;
+    }
+
+    public Database getDB()
+    {
+        return connection.getDB();
     }
 
     public ArrayList<File> getFiles()
