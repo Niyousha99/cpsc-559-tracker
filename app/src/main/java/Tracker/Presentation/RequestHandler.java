@@ -75,7 +75,7 @@ public class RequestHandler
     private HttpResponse join(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /join endpoint");
-        return switch (dataDB.join(httpRequest.getSourceIP() + ":" + httpRequest.getSourcePort()))
+        return switch (dataDB.join(httpRequest.getSourceIP()))
                 {
                     case 0 -> successResponse.build();
                     default -> serverErrorResponse.build();
@@ -85,7 +85,7 @@ public class RequestHandler
     private HttpResponse exit(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /exit endpoint");
-        return switch (dataDB.exit(httpRequest.getSourceIP() + ":" + httpRequest.getSourcePort()))
+        return switch (dataDB.exit(httpRequest.getSourceIP()))
                 {
                     case 0 -> successResponse.build();
                     default -> serverErrorResponse.build();
@@ -120,7 +120,7 @@ public class RequestHandler
     private HttpResponse removeOwner(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /removeOwner endpoint");
-        return switch (dataDB.removeOwner(httpRequest.getSourceIP() + ":" + httpRequest.getSourcePort(), requestParameters.get("hash")))
+        return switch (dataDB.removeOwner(httpRequest.getSourceIP(), requestParameters.get("hash")))
                 {
                     case 0 -> successResponse.build();
                     default -> serverErrorResponse.build();
@@ -134,7 +134,7 @@ public class RequestHandler
         ArrayList<File> newFiles = new ArrayList<>();
         requestData.forEach(rawFile -> newFiles.add(new File(rawFile.get("filename").toString(), rawFile.get("hash").toString(), ((Double) Double.parseDouble(rawFile.get("size").toString())).longValue(), new ArrayList<User>())));
 
-        return switch (dataDB.upload(httpRequest.getSourceIP() + ":" + httpRequest.getSourcePort(), newFiles))
+        return switch (dataDB.upload(httpRequest.getSourceIP(), newFiles))
                 {
                     case 0 -> successResponse.build();
                     default -> serverErrorResponse.build();
