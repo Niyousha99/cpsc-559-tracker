@@ -1,163 +1,133 @@
 package Tracker.Infrastructure.ToyDatabaseServer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
 import Tracker.Infrastructure.ToyDatabaseServer.Model.File;
 import Tracker.Infrastructure.ToyDatabaseServer.Model.User;
-import Tracker.Infrastructure.Utils.Result;
+import com.google.gson.Gson;
 
-public final class DatabaseEngine {
-    private static final HashMap<String, HashMap<String, Boolean>> USER_FILES = new HashMap<String, HashMap<String, Boolean>>();
-    private static final HashMap<String, HashMap<String, Boolean>> FILE_OWNERS = new HashMap<String, HashMap<String, Boolean>>();
-    private static final HashMap<String, User> USERS = new HashMap<String, User>();
-    private static final HashMap<String, File> FILES = new HashMap<String, File>();
+import java.util.ArrayList;
 
+public final class DatabaseEngine
+{
     private static Database database;
 
-    public static synchronized void setDatabase(Database db) {
+    public static synchronized void setDatabase(Database db)
+    {
         database = db;
-        initialize();
+        purgeUnavailableFiles();
     }
 
-    private static synchronized void initialize() {
-        database.getUsers().stream().forEach(
-            (user) -> {
-                USERS.put(user.getIpAddress(), user);
-                USER_FILES.put(user.getIpAddress(), new HashMap<String, Boolean>());
-            }
-        );
-
-        database.getFiles().stream().forEach(
-            (file) -> {
-                FILES.put(file.getFilename(), file);
-                FILE_OWNERS.put(file.getFilename(), new HashMap<String, Boolean>());
-
-                file.getOwners().forEach(
-                    (ipAddress) -> {
-                        FILE_OWNERS.get(file.getFilename()).put(ipAddress, true);
-                        USER_FILES.get(ipAddress).put(file.getFilename(), true);
-                    }
-                );
-            }
-        );
+    private static <T> T deepClone(T input)
+    {
+        try
+        {
+            Gson serializer = new Gson();
+            return serializer.fromJson(serializer.toJson(input, input.getClass()), (Class<T>) input.getClass());
+        } catch (Exception exception)
+        {
+            return null;
+        }
     }
 
-    public static synchronized Result<ArrayList> getObject(String objectType, HashMap<String, String> kv) {
-        objectType = new String(objectType);
-        if (objectType.equals("user")) {
-            if (kv.containsKey("ipAddress")) {
-                User user = USERS.get(kv.get("ipAddress"));
-                if (user != null) {
-                    user = user.deepClone();
+    public static synchronized Database getDB()
+    {
+        try
+        {
+            return deepClone(database);
+        } catch (Exception exception)
+        {
+            return null;
+        }
+    }
+
+    public static synchronized ArrayList<File> getFiles()
+    {
+        try
+        {
+            return new ArrayList<File>(deepClone(database).files().values());
+        } catch (Exception exception)
+        {
+            return null;
+        }
+    }
+
+    public static synchronized File getFile(String hash)
+    {
+        try
+        {
+            return deepClone(database).files().get(hash);
+        } catch (Exception exception)
+        {
+            return null;
+        }
+    }
+
+    public static synchronized int addUser(String ipAddress)
+    {
+        try
+        {
+            database.users().putIfAbsent(ipAddress, new User(ipAddress));
+            return 0;
+        } catch (Exception exception)
+        {
+            return -1;
+        }
+    }
+
+    public static synchronized int removeUser(String ipAddress)
+    {
+        try
+        {
+            database.files().forEach((hash, file) -> file.owners().remove(database.users().get(ipAddress)));
+            database.users().remove(ipAddress);
+            purgeUnavailableFiles();
+            return 0;
+        } catch (Exception exception)
+        {
+            return -1;
+        }
+    }
+
+    public static synchronized int removeOwner(String ipAddress, String hash)
+    {
+        try
+        {
+            database.files().get(hash).owners().remove(database.users().get(ipAddress));
+            purgeUnavailableFiles();
+            return 0;
+        } catch (Exception exception)
+        {
+            return -1;
+        }
+    }
+
+    public static synchronized int addFiles(String ipAddress, ArrayList<File> newFiles)
+    {
+        try
+        {
+            if (database.users().get(ipAddress) == null) return -1;
+
+            newFiles.forEach(newFile -> {
+                if (database.files().containsKey(newFile.hash()))
+                {
+                    if (!database.files().get(newFile.hash()).owners().contains(database.users().get(ipAddress)))
+                        database.files().get(newFile.hash()).owners().add(database.users().get(ipAddress));
+                } else
+                {
+                    database.files().put(newFile.hash(), newFile);
+                    newFile.owners().add(database.users().get(ipAddress));
                 }
-                return Result.success(new ArrayList(Arrays.asList(user)));
-            }
-
-            return Result.fail();
+            });
+            return 0;
+        } catch (Exception exception)
+        {
+            return -1;
         }
-        return Result.fail();
-
     }
 
-    public static synchronized int addNewUser(String ipAddress) {
-        
-        ipAddress = new String(ipAddress);
-
-        if (USERS.get(ipAddress) != null) {
-            return -1;
-        }
-
-        User user = new User(ipAddress);
-        database.getUsers().add(user);
-        USERS.put(user.getIpAddress(), user);
-        USER_FILES.put(user.getIpAddress(), new HashMap<String, Boolean>());
-        return 0;
+    private static synchronized void purgeUnavailableFiles()
+    {
+        database.files().forEach((hash, file) -> {
+            if (file.owners().isEmpty()) database.files().remove(hash);
+        });
     }
-
-    public static synchronized int addNewFile(String filename, String hash, ArrayList<String> owners) {
-        filename= new String(filename);
-        if (FILES.get(filename) != null) {
-            return -1;
-        }
-
-        owners = new ArrayList<String>(
-            owners.stream().map(
-                (ipAddress) -> {
-                return new String(ipAddress);}
-            ).collect(Collectors.toList())
-        );
-
-        boolean allValidOwners = owners.stream().anyMatch(
-            (ipAddress) -> {
-                return USERS.getOrDefault(ipAddress, null) != null;
-            }
-        );
-
-        if (!allValidOwners) {
-            return -1;
-        }
-
-        File file = new File(filename, hash, owners);
-        database.getFiles().add(file);
-        FILES.put(file.getFilename(), file);
-        FILE_OWNERS.put(file.getFilename(), new HashMap<String, Boolean>());
-        
-        file.getOwners().forEach(
-            (ipAddress) -> {
-                FILE_OWNERS.get(file.getFilename()).put(ipAddress, true);
-            }
-        );
-
-        return 0;
-    }
-
-    public static synchronized int removeFileOwners(String requestedFilename, ArrayList<String> formerOwners) {
-        String filename = new String(requestedFilename);
-        if (FILES.get(filename) == null) {
-            return -1;
-        }
-
-        formerOwners = new ArrayList<String>(
-            formerOwners.stream().map(
-                (ipAddress) -> {
-                return new String(ipAddress);}
-            ).collect(Collectors.toList())
-        );
-
-        boolean everyOwnerExistsAndOwnsFile = formerOwners.stream().allMatch(
-            (ipAddress) -> {
-                return (USERS.get(ipAddress) != null) && (
-                    USER_FILES.get(ipAddress).getOrDefault(filename, false)
-                );
-            }
-        );
-
-        if (!everyOwnerExistsAndOwnsFile) {
-            return -1;
-        }
-
-        formerOwners.forEach(
-            (ipAddress) -> {
-                FILE_OWNERS.get(filename).put(ipAddress, false);
-                USER_FILES.get(ipAddress).put(filename, false);
-            }
-        ); 
-
-       FILES.get(filename).setOwners(new ArrayList<String>(FILES.get(filename).getOwners().stream().filter(
-            (ipAddress) -> {
-                return USER_FILES.get(ipAddress).getOrDefault(filename, false);
-            }
-        ).collect(Collectors.toList())));
-
-        return 0;
-    }
-
-
-
-
-
 }

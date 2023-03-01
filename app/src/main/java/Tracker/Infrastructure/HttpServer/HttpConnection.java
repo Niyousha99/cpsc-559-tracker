@@ -1,14 +1,5 @@
 package Tracker.Infrastructure.HttpServer;
 
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
-import java.net.http.HttpRequest;
-import java.util.LinkedList;
-import java.util.Queue;
-
 import Tracker.BusinessLogic.HttpRequestObject;
 import Tracker.BusinessLogic.HttpResponse;
 import Tracker.BusinessLogic.Utiles.HttpRequestBuilder;
@@ -17,14 +8,25 @@ import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Scanner;
 import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Token;
 import Tracker.Infrastructure.Utils.FailureException;
 
-public class HttpConnection {
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class HttpConnection
+{
     private final Socket socket;
 
-    public HttpConnection(Socket socket) {
+    public HttpConnection(Socket socket)
+    {
         this.socket = socket;
     }
 
-    public HttpRequestObject getHttpRequest() throws IOException, FailureException {
+    public HttpRequestObject getHttpRequest() throws IOException, FailureException
+    {
         DataInputStream inputStream = new DataInputStream(this.socket.getInputStream());
         Queue<Token> queue = new LinkedList<Token>();
         Scanner scanner = new Scanner(inputStream, queue);
@@ -36,14 +38,16 @@ public class HttpConnection {
         String body = context.substring(iterator);
         scanner.nextContext();
         String tmp = scanner.consumeContext();
-        if (tmp != null) {
+        if (tmp != null)
+        {
             body = body + tmp;
         }
-        requestBuilder = requestBuilder.withBody(body);
+        requestBuilder = requestBuilder.withBody(body).withSourceIP(((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress().getHostAddress()).withSourcePort(String.valueOf(((InetSocketAddress) socket.getRemoteSocketAddress()).getPort()));
         return requestBuilder.build();
     }
 
-    public void HttpResponse(HttpResponse response) throws IOException {
+    public void HttpResponse(HttpResponse response) throws IOException
+    {
         DataOutputStream outputStream = new DataOutputStream(this.socket.getOutputStream());
         outputStream.write(response.toString().getBytes());
         outputStream.flush();
@@ -51,5 +55,5 @@ public class HttpConnection {
         outputStream.close();
         this.socket.close();
     }
-    
+
 }

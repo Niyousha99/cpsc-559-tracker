@@ -1,22 +1,50 @@
 package Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import Tracker.Infrastructure.ToyDatabaseServer.Database;
 import Tracker.Infrastructure.ToyDatabaseServer.DatabaseEngine;
-import Tracker.Infrastructure.Utils.Result;
+import Tracker.Infrastructure.ToyDatabaseServer.Model.File;
 
-public class DatabaseConnection {
-    
-    private DatabaseConnection() {
+import java.util.ArrayList;
 
-    }
-
-    public static DatabaseConnection getConnection() {
+public class DatabaseConnection
+{
+    public static DatabaseConnection getConnection()
+    {
         return new DatabaseConnection();
     }
 
-    public Result<ArrayList> getObject(String objectType, HashMap<String, String> keyAttributePair) {
-       return DatabaseEngine.getObject(objectType, keyAttributePair);
+    public Database getDB()
+    {
+        return DatabaseEngine.getDB();
+    }
+
+    public ArrayList<File> getFiles()
+    {
+        return DatabaseEngine.getFiles();
+    }
+
+    public File getFile(String hash)
+    {
+        return DatabaseEngine.getFile(hash);
+    }
+
+    public int addUser(String ipAddress)
+    {
+        return DatabaseEngine.addUser(ipAddress);
+    }
+
+    public int removeUser(String ipAddress)
+    {
+        return DatabaseEngine.removeUser(ipAddress);
+    }
+
+    public int removeOwner(String ipAddress, String hash)
+    {
+        return DatabaseEngine.removeOwner(ipAddress, hash);
+    }
+
+    public int addFiles(String ipAddress, ArrayList<File> newFiles)
+    {
+        return DatabaseEngine.addFiles(ipAddress, newFiles);
     }
 }

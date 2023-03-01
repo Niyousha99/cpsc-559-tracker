@@ -3,49 +3,67 @@
  */
 package Tracker;
 
-import java.io.*;
-import java.util.HashMap;
-
+import Tracker.Infrastructure.HttpServer.Server;
+import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.DatabaseConnectionManager;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
-import Tracker.Infrastructure.HttpServer.Server;
-import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.DatabaseConnectionManager;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
 
-public class App {
-    public String getGreeting() {
+public class App
+{
+    private static String databasePath;
+
+    public String getGreeting()
+    {
         return "Hello World!";
     }
 
-	// MAKE SURE YOU CHANGE THIS TO PATH 
-	private static final String DATABASE = "/Users/armeenrashidian/Documents/cpsc557/Tracker/app/src/main/resources/Database.txt";
-
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         HashMap<String, String> params = parseCommandLine(args);
-        int serverPort = Integer.parseInt( params.getOrDefault("-p", "2025") ); // server port number
-        System.out.println("starting the server on port " + serverPort);
-        Server server = new Server(serverPort);
-		// initialize database
-		try {
-			DatabaseConnectionManager.initialize(DATABASE);
-		} catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Can't connect to database");
-			e.printStackTrace();
-		}
-		server.listen();
+        databasePath = params.getOrDefault("-d", FileSystems.getDefault().getPath("").toAbsolutePath() + "/Database.txt");
+        String serverIP = params.getOrDefault("-ip", null);
+        int serverPort = Integer.parseInt(params.getOrDefault("-p", "3001")); // server port number
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> DatabaseConnectionManager.shutdown(databasePath)));
+
+        System.out.println("Starting the server on port " + serverPort);
+        Server server = new Server(serverIP, serverPort);
+        // initialize database
+        try
+        {
+            if (Files.exists(Path.of(databasePath)))
+                DatabaseConnectionManager.initialize(databasePath, Boolean.parseBoolean(params.getOrDefault("-r", String.valueOf(false))));
+            else
+            {
+                Files.createFile(Path.of(databasePath));
+                DatabaseConnectionManager.initialize(databasePath, true);
+            }
+        } catch (JsonIOException | JsonSyntaxException | SecurityException | IOException e)
+        {
+            System.out.println("Can't connect to database");
+            e.printStackTrace();
+        }
+        server.listen();
     }
 
-    	// parse command line arguments
-	private static HashMap<String, String> parseCommandLine(String[] args) {
-		HashMap<String, String> params = new HashMap<String, String>();
+    // parse command line arguments
+    private static HashMap<String, String> parseCommandLine(String[] args)
+    {
+        HashMap<String, String> params = new HashMap<String, String>();
 
-		int i = 0;
-		while ((i + 1) < args.length) {
-			params.put(args[i], args[i+1]);
-			i += 2;
-		}
-		
-		return params;
-	}
+        int i = 0;
+        while ((i + 1) < args.length)
+        {
+            params.put(args[i], args[i + 1]);
+            i += 2;
+        }
+
+        return params;
+    }
 }
