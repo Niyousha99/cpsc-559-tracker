@@ -61,7 +61,7 @@ public final class DatabaseEngine
         }
     }
 
-    public static synchronized int addUser(String ipAddress)
+    private static synchronized int addUser(String ipAddress)
     {
         try
         {
@@ -104,7 +104,7 @@ public final class DatabaseEngine
     {
         try
         {
-            if (database.users().get(ipAddress) == null) return -1;
+            if (database.users().get(ipAddress) == null) addUser(ipAddress);
 
             newFiles.forEach(newFile -> {
                 if (database.files().containsKey(newFile.hash()))

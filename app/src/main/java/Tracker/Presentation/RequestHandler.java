@@ -58,7 +58,6 @@ public class RequestHandler
     {
         return switch (requestPath[0])
                 {
-                    case "/join" -> join(httpRequest, requestPath, requestParameters);
                     case "/removeOwner" -> removeOwner(httpRequest, requestPath, requestParameters);
                     case "/upload" -> upload(httpRequest, requestPath, requestParameters);
                     case "/exit" -> exit(httpRequest, requestPath, requestParameters);
@@ -70,16 +69,6 @@ public class RequestHandler
     {
         System.out.println("Called /getDB endpoint");
         return successResponse.withBody(new GsonBuilder().setPrettyPrinting().create().toJson(dataDB.getDB())).build();
-    }
-
-    private HttpResponse join(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
-    {
-        System.out.println("Called /join endpoint");
-        return switch (dataDB.join(httpRequest.getSourceIP()))
-                {
-                    case 0 -> successResponse.build();
-                    default -> serverErrorResponse.build();
-                };
     }
 
     private HttpResponse exit(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)

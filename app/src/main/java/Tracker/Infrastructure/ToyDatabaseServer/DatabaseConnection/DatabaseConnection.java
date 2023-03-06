@@ -28,11 +28,6 @@ public class DatabaseConnection
         return DatabaseEngine.getFile(hash);
     }
 
-    public int addUser(String ipAddress)
-    {
-        return DatabaseEngine.addUser(ipAddress);
-    }
-
     public int removeUser(String ipAddress)
     {
         return DatabaseEngine.removeUser(ipAddress);

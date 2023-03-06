@@ -35,11 +35,6 @@ public class DataDBImpl implements DataDB
 
     public int upload(String ipAddress, ArrayList<File> newFiles) {return connection.addFiles(ipAddress, newFiles);}
 
-    public int join(String ipAddress)
-    {
-        return connection.addUser(ipAddress);
-    }
-
     public int exit(String ipAddress)
     {
         return connection.removeUser(ipAddress);
