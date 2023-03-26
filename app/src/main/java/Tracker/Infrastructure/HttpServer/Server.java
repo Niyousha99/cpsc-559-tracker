@@ -7,9 +7,13 @@ import java.net.SocketTimeoutException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Server extends Thread
+import Tracker.Infrastructure.ProcessManager;
+import Tracker.Infrastructure.Task;
+import Tracker.Infrastructure.Election.ElectionManager;
+
+public class Server 
 {
-    private final String ip;
+    private String ip;
     private final int port;
     private static final int TIMEOUT = 1000;
 
@@ -24,11 +28,17 @@ public class Server extends Thread
         try
         {
             ServerSocket serverSocket;
-            if (ip == null) serverSocket = new ServerSocket(port);
-            else serverSocket = new ServerSocket(port, 50, InetAddress.getByName(ip.trim()));
+            if (ip == null) {
+                serverSocket = new ServerSocket(port);
+                ip = serverSocket.getInetAddress().getHostAddress();
+            }
+            else {
+                serverSocket = new ServerSocket(port, 50, InetAddress.getByName(ip.trim()));
+            }
             serverSocket.setSoTimeout(TIMEOUT);
             ExecutorService cachedThreads = Executors.newCachedThreadPool();
-
+            ElectionManager.initialize(ip, port);
+            cachedThreads.execute(new ProcessManager());
             while (true)
             {
                 try
