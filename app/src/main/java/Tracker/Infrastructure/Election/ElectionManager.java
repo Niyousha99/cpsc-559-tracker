@@ -134,6 +134,7 @@ public class ElectionManager {
         if (electionMessage.getMessageType() == MessageType.leader) {
             leader = electionMessage.getProcess();
             running = false;
+            socket.close();
         }
 
         else if (electionMessage.getMessageType() == MessageType.election) {
@@ -143,11 +144,21 @@ public class ElectionManager {
                 outputStream.write(gson.toJson(bully, ElectionMessage.class).getBytes("utf-8"));
                 outputStream.flush(); 
                 outputStream.close();
+                socket.close();
                 // if not running then initiate election
                 if (!running) {
                     initiateElection();
                 }
             }
+            socket.close();
+        }
+
+        else if (electionMessage.getMessageType() == MessageType.ping) {
+            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+            outputStream.write(new String("OK").getBytes());
+            outputStream.flush();
+            outputStream.close();
+            socket.close();
         }
     }
 }
