@@ -45,6 +45,7 @@ public class Server
             ExecutorService cachedThreads = Executors.newCachedThreadPool();
             ElectionManager.initialize(ip, port + 1);
             cachedThreads.execute(new ProcessManager());
+
             Thread clientSocketThread = new Thread(() -> {
                 while (true)
                 {
