@@ -1,17 +1,17 @@
 package Tracker.Infrastructure.Election;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.ArrayList;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 
 public class ElectionManager {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -19,7 +19,8 @@ public class ElectionManager {
     private static String leader = null;
     private static String self_ip;
     private static int self_port;
-    private static long waitTime = 10000;
+    private static final long waitTime = 10000;
+    private static final int maxTrackers = 10;
 
     public static synchronized boolean detectFailure() {
         if (leader == null) {
@@ -27,9 +28,6 @@ public class ElectionManager {
         }
         try {
             return pingLeader();
-        } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -41,14 +39,13 @@ public class ElectionManager {
         self_ip = ip;
         self_port = port;
     }
-    
-    private static boolean pingLeader() throws UnknownHostException, IOException {
+
+    private static boolean pingLeader() throws IOException {
         Socket socket = new Socket(InetAddress.getByName(leader), self_port, InetAddress.getByName(self_ip), 0);
-        byte[] pingMessage = gson.toJson(new ElectionMessage(MessageType.ping, self_ip), ElectionMessage.class).getBytes();
-        DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-        outputStream.write(pingMessage);
+        String pingMessage = gson.toJson(new ElectionMessage(MessageType.ping, self_ip, null), ElectionMessage.class);
+        ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+        outputStream.writeObject(pingMessage);
         outputStream.flush();
-        outputStream.close();
 
         long startTime = Instant.now().toEpochMilli();
         boolean noResponse = true;
@@ -58,107 +55,113 @@ public class ElectionManager {
             }
         }
 
-        socket.getInputStream().close();
-        socket.close();
-
         if (noResponse) {
             return true;
         }
         return false;
     }
-    
-    public static synchronized void initiateElection() throws UnknownHostException, IOException {
+
+    public static synchronized void initiateElection() throws IOException {
         running = true;
         leader = null;
-        String[] strs = leader.split(".");
+        String[] strs = self_ip.split("\\.");
         String prefix = strs[0] + "." + strs[1] + "." + strs[2];
-        int startSuffix = Integer.parseInt(strs[3]) + 1;
-        byte[] initiateMessage = gson.toJson(new ElectionMessage(MessageType.election, self_ip), ElectionMessage.class).getBytes();
-        ArrayList<Socket> sockets = new ArrayList<Socket>();
+        int startingIP = Integer.parseInt(strs[3]);
+        int endingIP = maxTrackers;
+        String initiateMessage = gson.toJson(new ElectionMessage(MessageType.election, self_ip, null), ElectionMessage.class);
+        ArrayList<Socket> sockets = new ArrayList<>();
 
-        while (startSuffix < 255) {
-            Socket socket = new Socket(InetAddress.getByName(prefix + "." + startSuffix), self_port, InetAddress.getByName(self_ip), 0);
-            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-            outputStream.write(initiateMessage);
-            outputStream.flush();
-            outputStream.close();
-            sockets.add(socket);
-            startSuffix++;
+        for (int counter = startingIP + 1; counter <= endingIP; counter++)
+        {
+            System.out.println(counter);
+            if (InetAddress.getByName(prefix + "." + counter).isReachable(1000))
+            {
+                Socket socket;
+                try
+                {
+                    socket = new Socket(InetAddress.getByName(prefix + "." + counter), self_port, InetAddress.getByName(self_ip), 0);
+                    ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                    outputStream.writeObject(initiateMessage);
+                    outputStream.flush();
+                    sockets.add(socket);
+                }
+                catch (ConnectException e) {}
+            }
         }
         // current time
         long startTime = Instant.now().toEpochMilli();
         boolean bullyReceived = false;
         // wait for t time units
         while ((Instant.now().toEpochMilli() - startTime) < waitTime) {
-            // check if response received 
+            // check if response received
             for (Socket socket : sockets) {
-                if (socket.getInputStream().available() > 0) {
-                    bullyReceived = true;
-                    break;
-                }
+                if (!socket.isClosed())
+                    if (socket.getInputStream().available() > 0) {
+                        bullyReceived = true;
+                        break;
+                    }
             }
             if (bullyReceived) {
                 break;
             }
         }
 
-        // if no bully, inform processes they are the leader 
+        // if no bully, inform processes they are the leader
         if (!bullyReceived) {
             leader = self_ip;
-            byte[] leaderMessage = gson.toJson(new ElectionMessage(MessageType.leader, self_ip), ElectionMessage.class).getBytes();
-            for (int i = 1; i < 255; i++) {
-                if (i == Integer.parseInt(strs[3])) {
+            String leaderMessage = gson.toJson(new ElectionMessage(MessageType.leader, self_ip, null), ElectionMessage.class);
+            for (int counter = 1; counter <= endingIP; counter++) {
+                if (counter == Integer.parseInt(strs[3])) {
                     continue;
                 }
-                Socket socket = new Socket(InetAddress.getByName(prefix + "." + i), self_port, InetAddress.getByName(self_ip), 0);
-                DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-                outputStream.write(leaderMessage);
-                outputStream.flush();
-                outputStream.close();
-                socket.close();
+
+                if (InetAddress.getByName(prefix + "." + counter).isReachable(1000))
+                {
+                    Socket socket;
+                    try
+                    {
+                        socket = new Socket(InetAddress.getByName(prefix + "." + counter), self_port, InetAddress.getByName(self_ip), 0);
+                        ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                        outputStream.writeObject(leaderMessage);
+                        outputStream.flush();
+                    } catch (ConnectException e)
+                    {
+                    }
+                }
             }
             running = false;
         }
 
         for (Socket socket : sockets) {
-            socket.close();
-        }        
+//            socket.close();
+        }
     }
 
-    public static synchronized void receiveMessage(Socket socket) throws IOException, JsonSyntaxException {
-        DataInputStream inputStream = new DataInputStream(socket.getInputStream());
-        byte[] message = inputStream.readAllBytes();
-        ElectionMessage electionMessage = gson.fromJson(new String(message), ElectionMessage.class);
-        inputStream.close(); 
+    public static synchronized void receiveMessage(Socket socket, ElectionMessage message) throws IOException, JsonSyntaxException {
+        System.out.println("Receiving");
 
-        if (electionMessage.getMessageType() == MessageType.leader) {
-            leader = electionMessage.getProcess();
+        if (message.messageType() == MessageType.leader) {
+            leader = message.process();
             running = false;
-            socket.close();
         }
 
-        else if (electionMessage.getMessageType() == MessageType.election) {
-            if (electionMessage.getProcess().compareToIgnoreCase(self_ip) < 0) {
-                DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-                ElectionMessage bully = new ElectionMessage(MessageType.bully, self_ip);
-                outputStream.write(gson.toJson(bully, ElectionMessage.class).getBytes("utf-8"));
-                outputStream.flush(); 
-                outputStream.close();
-                socket.close();
+        else if (message.messageType() == MessageType.election) {
+            if (message.process().compareToIgnoreCase(self_ip) < 0) {
+                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                ElectionMessage bully = new ElectionMessage(MessageType.bully, self_ip, null);
+                outputStream.writeObject(gson.toJson(bully, ElectionMessage.class));
+                outputStream.flush();
                 // if not running then initiate election
                 if (!running) {
                     initiateElection();
                 }
             }
-            socket.close();
         }
 
-        else if (electionMessage.getMessageType() == MessageType.ping) {
-            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-            outputStream.write(new String("OK").getBytes());
+        else if (message.messageType() == MessageType.ping) {
+            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+            outputStream.writeObject("OK");
             outputStream.flush();
-            outputStream.close();
-            socket.close();
         }
     }
 }
