@@ -1,6 +1,7 @@
 package Tracker.Infrastructure.HttpServer;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -44,6 +45,7 @@ public class Server
                 try
                 {
                     Socket socket = serverSocket.accept();
+                    System.out.println("Got connection from " + ((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress().getHostAddress());
                     socket.setSoTimeout(TIMEOUT);
                     cachedThreads.execute(new Task(socket));
                 } catch (SocketTimeoutException se)

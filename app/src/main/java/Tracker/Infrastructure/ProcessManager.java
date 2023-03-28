@@ -6,20 +6,20 @@ import java.net.UnknownHostException;
 import Tracker.Infrastructure.Election.ElectionManager;
 
 public class ProcessManager implements Runnable {
-    private long waitTime;
+    private long waitTime = 10000;
 
     private void loop() {
+        try {
+            Thread.sleep(waitTime);
+        }
+        catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
+
         while (true) {
             if (ElectionManager.detectFailure()) {
-                try {
-                    ElectionManager.initiateElection();
-                } catch (UnknownHostException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                ElectionManager.initiateElection();
+
                 try {
                     Thread.sleep(waitTime);
                 } catch (InterruptedException e) {

@@ -19,15 +19,16 @@ import java.util.Queue;
 public class HttpConnection
 {
     private final Socket socket;
+    private final DataInputStream inputStream;
 
-    public HttpConnection(Socket socket)
+    public HttpConnection(Socket socket, DataInputStream inputStream)
     {
         this.socket = socket;
+        this.inputStream = inputStream;
     }
 
     public HttpRequestObject getHttpRequest() throws IOException, FailureException
     {
-        DataInputStream inputStream = new DataInputStream(this.socket.getInputStream());
         Queue<Token> queue = new LinkedList<Token>();
         Scanner scanner = new Scanner(inputStream, queue);
         Parser parser = new Parser(scanner, queue);
