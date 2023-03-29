@@ -41,6 +41,11 @@ public class ElectionManager {
             return new String(leader);
     }
 
+    public static int getPort()
+    {
+        return self_port;
+    }
+
     public static synchronized boolean detectFailure() {
         if (leader == null) {
             return true;
