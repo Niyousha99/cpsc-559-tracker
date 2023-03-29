@@ -15,8 +15,12 @@ public class DatabaseBuilder {
 
     private DatabaseBuilder() {}
 
-    public static Database buildDatabase(String path) throws JsonIOException, JsonSyntaxException, FileNotFoundException {
+    public static Database buildDatabaseFromFile(String path) throws JsonIOException, JsonSyntaxException, FileNotFoundException {
         return gson.fromJson(new JsonReader(new FileReader(path)), Database.class);
     }
 
+    public static Database buildDatabaseFromJSON(String database) throws JsonIOException, JsonSyntaxException
+    {
+        return gson.fromJson(database, Database.class);
+    }
 }

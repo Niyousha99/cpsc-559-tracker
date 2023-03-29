@@ -6,6 +6,7 @@ import Tracker.BusinessLogic.HttpRequestObject;
 import Tracker.BusinessLogic.HttpResponse;
 import Tracker.BusinessLogic.Utiles.HttpResponseBuilder;
 import Tracker.Infrastructure.DataDBImpl;
+import Tracker.Infrastructure.Election.ElectionManager;
 import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.DatabaseConnectionManager;
 import Tracker.Infrastructure.ToyDatabaseServer.Model.File;
 import Tracker.Infrastructure.ToyDatabaseServer.Model.User;
@@ -14,14 +15,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 public class RequestHandler
 {
     private final DataDB dataDB;
 
     private final HttpResponseBuilder successResponse = HttpResponse.builder().withStatus("OK").withStatusCode(200).withBody("Success");
+    private final HttpResponseBuilder redirectResponse = HttpResponse.builder().withStatus("TEMPORARY REDIRECT").withStatusCode(307);
     private final HttpResponseBuilder badRequestResponse = HttpResponse.builder().withStatus("BAD REQUEST").withStatusCode(400).withBody("Request could not be understood");
     private final HttpResponseBuilder serverErrorResponse = HttpResponse.builder().withStatus("INTERNAL SERVER ERROR").withStatusCode(500).withBody("Failed to process request");
 
@@ -56,13 +57,26 @@ public class RequestHandler
 
     private HttpResponse handlePost(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
-        return switch (requestPath[0])
-                {
-                    case "/removeOwner" -> removeOwner(httpRequest, requestPath, requestParameters);
-                    case "/upload" -> upload(httpRequest, requestPath, requestParameters);
-                    case "/exit" -> exit(httpRequest, requestPath, requestParameters);
-                    default -> badRequestResponse.build();
-                };
+        if (ElectionManager.getLeader() == null) return serverErrorResponse.build();
+        else if (ElectionManager.getLeader().equalsIgnoreCase("self"))
+        {
+            HttpResponse response = switch (requestPath[0])
+                    {
+                        case "/removeOwner" -> removeOwner(httpRequest, requestPath, requestParameters);
+                        case "/upload" -> upload(httpRequest, requestPath, requestParameters);
+                        case "/exit" -> exit(httpRequest, requestPath, requestParameters);
+                        default -> badRequestResponse.build();
+                    };
+            ElectionManager.syncFollowers();
+            return response;
+        }
+        else
+        {
+            System.out.println("Redirecting " + requestPath[0] + " endpoint call");
+            HashMap<String, String> redirectHeaders = ((HashMap<String, String>) httpRequest.getHeaders());
+            redirectHeaders.put("Location", "http://" + ElectionManager.getLeader() + ":" + ElectionManager.getPort() + requestPath[0]);
+            return redirectResponse.withHeaders(redirectHeaders).withBody(ElectionManager.getLeader()).build();
+        }
     }
 
     private HttpResponse getDB(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
