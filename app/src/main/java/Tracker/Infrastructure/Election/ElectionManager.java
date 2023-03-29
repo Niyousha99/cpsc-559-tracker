@@ -134,6 +134,7 @@ public class ElectionManager {
                 }
                 executor.execute(new LeaderTask(self_ip, prefix + "." + i, self_port, leaderMessage));
             }
+            syncFollowers();
         }
  
         running = false;
