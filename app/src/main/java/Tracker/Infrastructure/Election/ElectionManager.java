@@ -17,6 +17,8 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import Tracker.Infrastructure.DataDBImpl;
+import Tracker.Infrastructure.ToyDatabaseServer.DatabaseConnection.DatabaseConnectionManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -29,7 +31,16 @@ public class ElectionManager {
     private static int self_port;
     private static long waitTime = 10000;
 
-    
+    public static String getLeader()
+    {
+        if (leader == null)
+            return null;
+        else if (self_ip.equalsIgnoreCase(leader))
+            return "self";
+        else
+            return new String(leader);
+    }
+
     public static synchronized boolean detectFailure() {
         if (leader == null) {
             return true;
@@ -157,6 +168,29 @@ public class ElectionManager {
             outputStream.write(new String("OK").getBytes());
             outputStream.flush();
             socket.close();
+        }
+
+        else if (electionMessage.getMessageType() == MessageType.sync)
+        {
+            System.out.println("Got sync data");
+            if (electionMessage.getProcess().equals(leader) && !electionMessage.getProcess().equals(self_ip))
+                DatabaseConnectionManager.importDB(electionMessage.getData());
+        }
+    }
+
+    public static synchronized void syncFollowers()
+    {
+        System.out.println("Sending sync data");
+        String[] strs = self_ip.split("\\.");
+        String prefix = strs[0] + "." + strs[1] + "." + strs[2];
+        ExecutorService executor = (ExecutorService) Executors.newCachedThreadPool();
+
+        byte[] dataMessage = gson.toJson(new ElectionMessage(MessageType.sync, self_ip, new GsonBuilder().setPrettyPrinting().create().toJson(new DataDBImpl(DatabaseConnectionManager.getConnection()).getDB())), ElectionMessage.class).getBytes();
+        for (int i = 1; i < 10; i++) {
+            if (i == Integer.parseInt(strs[3])) {
+                continue;
+            }
+            executor.execute(new SyncTask(self_ip, prefix + "." + i, self_port, dataMessage));
         }
     }
 }

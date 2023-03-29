@@ -26,7 +26,33 @@ public class DatabaseConnectionManager
         ConcurrentHashMap<String, File> files = new ConcurrentHashMap<>();
 
         if (cleanDB) databaseModel = new Gson().fromJson("{\"users\":{},\"files\":{}}", Database.class);
-        else databaseModel = DatabaseBuilder.buildDatabase(path);
+        else databaseModel = DatabaseBuilder.buildDatabaseFromFile(path);
+
+        databaseModel.files().forEach((hash, file) -> {
+            ArrayList<User> owners = new ArrayList<User>();
+            files.put(file.hash(), new File(file.filename(), file.hash(), file.size(), owners));
+            file.owners().forEach(owner -> {
+                if (users.containsKey(owner.ipAddress())) owners.add(users.get(owner.ipAddress()));
+                else
+                {
+                    users.put(owner.ipAddress(), owner);
+                    owners.add(owner);
+                }
+            });
+        });
+
+        databaseModel.users().forEach((ip, user) -> users.putIfAbsent(user.ipAddress(), user));
+
+        database = new Database(users, files);
+        DatabaseEngine.setDatabase(database);
+    }
+    public static void importDB(String jsonDB)
+    {
+        Database databaseModel;
+        ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, File> files = new ConcurrentHashMap<>();
+
+        databaseModel = DatabaseBuilder.buildDatabaseFromJSON(jsonDB);
 
         databaseModel.files().forEach((hash, file) -> {
             ArrayList<User> owners = new ArrayList<User>();
