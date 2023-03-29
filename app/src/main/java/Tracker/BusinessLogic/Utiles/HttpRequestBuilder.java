@@ -8,6 +8,8 @@ import java.util.Map;
 
 public class HttpRequestBuilder
 {
+    private static final Map<String, Boolean> acceptedMethods = Map.ofEntries(new AbstractMap.SimpleEntry<>("GET", true), new AbstractMap.SimpleEntry<>("POST", true), new AbstractMap.SimpleEntry<>("PUT", true), new AbstractMap.SimpleEntry<>("OPTIONS", true), new AbstractMap.SimpleEntry<>("DELETE", true), new AbstractMap.SimpleEntry<>("PATCH", true));
+    private static final Map<String, Boolean> acceptedVersions = Map.ofEntries(new AbstractMap.SimpleEntry<>("HTTP/1.1", true), new AbstractMap.SimpleEntry<>("HTTP/1.0", true));
     private String httpMethod;
     private String path;
     private String httpVersion;
@@ -15,10 +17,6 @@ public class HttpRequestBuilder
     private String body;
     private String sourceIP;
     private String sourcePort;
-
-    private static final Map<String, Boolean> acceptedMethods = Map.ofEntries(new AbstractMap.SimpleEntry<String, Boolean>("GET", true), new AbstractMap.SimpleEntry<String, Boolean>("POST", true), new AbstractMap.SimpleEntry<String, Boolean>("PUT", true), new AbstractMap.SimpleEntry<String, Boolean>("OPTIONS", true), new AbstractMap.SimpleEntry<String, Boolean>("DELETE", true), new AbstractMap.SimpleEntry<String, Boolean>("PATCH", true));
-
-    private static final Map<String, Boolean> acceptedVersions = Map.ofEntries(new AbstractMap.SimpleEntry<String, Boolean>("HTTP/1.1", true), new AbstractMap.SimpleEntry<String, Boolean>("HTTP/1.0", true));
 
     public Map<String, String> getHeaders()
     {
@@ -86,7 +84,7 @@ public class HttpRequestBuilder
         String host = headers.getOrDefault("Host", headers.getOrDefault("host", null));
         if (host == null || host.isEmpty())
         {
-//            throw new FailureException();
+            //            throw new FailureException();
         }
 
         return new HttpRequestObject(httpMethod, path, httpVersion, headers, body, sourceIP, sourcePort);

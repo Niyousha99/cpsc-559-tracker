@@ -15,7 +15,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RequestHandler
 {
@@ -33,13 +35,13 @@ public class RequestHandler
 
     public HttpResponse handleRequest(HttpRequestObject httpRequest)
     {
-        String[] requestPath = httpRequest.getPath().split("\\?");
+        String[] requestPath = httpRequest.path().split("\\?");
         Map<String, String> requestParameters = null;
         if (requestPath.length > 1)
             requestParameters = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(requestPath[1]);
 
-        if (httpRequest.getHttpMethod().equals("GET")) return handleGet(httpRequest, requestPath, requestParameters);
-        else if (httpRequest.getHttpMethod().equals("POST"))
+        if (httpRequest.httpMethod().equals("GET")) return handleGet(httpRequest, requestPath, requestParameters);
+        else if (httpRequest.httpMethod().equals("POST"))
             return handlePost(httpRequest, requestPath, requestParameters);
         else return serverErrorResponse.build();
     }
@@ -47,12 +49,12 @@ public class RequestHandler
     private HttpResponse handleGet(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         return switch (requestPath[0])
-                {
-                    case "/getDB" -> getDB(httpRequest, requestPath, requestParameters);
-                    case "/getFile" -> getFile(httpRequest, requestPath, requestParameters);
-                    case "/getFiles" -> getFiles(httpRequest, requestPath, requestParameters);
-                    default -> badRequestResponse.build();
-                };
+        {
+            case "/getDB" -> getDB(httpRequest, requestPath, requestParameters);
+            case "/getFile" -> getFile(httpRequest, requestPath, requestParameters);
+            case "/getFiles" -> getFiles(httpRequest, requestPath, requestParameters);
+            default -> badRequestResponse.build();
+        };
     }
 
     private HttpResponse handlePost(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
@@ -61,19 +63,18 @@ public class RequestHandler
         else if (ElectionManager.getLeader().equalsIgnoreCase("self"))
         {
             HttpResponse response = switch (requestPath[0])
-                    {
-                        case "/removeOwner" -> removeOwner(httpRequest, requestPath, requestParameters);
-                        case "/upload" -> upload(httpRequest, requestPath, requestParameters);
-                        case "/exit" -> exit(httpRequest, requestPath, requestParameters);
-                        default -> badRequestResponse.build();
-                    };
+            {
+                case "/removeOwner" -> removeOwner(httpRequest, requestPath, requestParameters);
+                case "/upload" -> upload(httpRequest, requestPath, requestParameters);
+                case "/exit" -> exit(httpRequest, requestPath, requestParameters);
+                default -> badRequestResponse.build();
+            };
             ElectionManager.syncFollowers();
             return response;
-        }
-        else
+        } else
         {
             System.out.println("Redirecting " + requestPath[0] + " endpoint call");
-            HashMap<String, String> redirectHeaders = ((HashMap<String, String>) httpRequest.getHeaders());
+            HashMap<String, String> redirectHeaders = ((HashMap<String, String>) httpRequest.headers());
             redirectHeaders.put("Location", "http://" + ElectionManager.getLeader() + ":" + ElectionManager.getPort() + requestPath[0]);
             return redirectResponse.withHeaders(redirectHeaders).withBody(ElectionManager.getLeader()).build();
         }
@@ -88,11 +89,11 @@ public class RequestHandler
     private HttpResponse exit(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /exit endpoint");
-        return switch (dataDB.exit(httpRequest.getSourceIP()))
-                {
-                    case 0 -> successResponse.build();
-                    default -> serverErrorResponse.build();
-                };
+        return switch (dataDB.exit(httpRequest.sourceIP()))
+        {
+            case 0 -> successResponse.build();
+            default -> serverErrorResponse.build();
+        };
     }
 
     private HttpResponse getFiles(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
@@ -114,7 +115,7 @@ public class RequestHandler
         File file = dataDB.getFile(requestParameters.get("hash"));
         if (file != null)
         {
-            File strippedFile = new File(file.filename(), file.hash(), file.size(), new ArrayList<User>());
+            File strippedFile = new File(file.filename(), file.hash(), file.size(), new ArrayList<>());
             file.owners().forEach(owner -> strippedFile.owners().add(new User(owner.ipAddress().replaceAll(":.*", ""))));
             return successResponse.withBody("{\n\"peers\": " + new GsonBuilder().setPrettyPrinting().create().toJson(strippedFile.owners()) + "\n}").build();
         } else return serverErrorResponse.build();
@@ -123,24 +124,24 @@ public class RequestHandler
     private HttpResponse removeOwner(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /removeOwner endpoint");
-        return switch (dataDB.removeOwner(httpRequest.getSourceIP(), requestParameters.get("hash")))
-                {
-                    case 0 -> successResponse.build();
-                    default -> serverErrorResponse.build();
-                };
+        return switch (dataDB.removeOwner(httpRequest.sourceIP(), requestParameters.get("hash")))
+        {
+            case 0 -> successResponse.build();
+            default -> serverErrorResponse.build();
+        };
     }
 
     private HttpResponse upload(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /upload endpoint");
-        ArrayList<LinkedTreeMap> requestData = (ArrayList) new Gson().fromJson(httpRequest.getBody(), LinkedTreeMap.class).get("files");
+        ArrayList<LinkedTreeMap> requestData = (ArrayList) new Gson().fromJson(httpRequest.body(), LinkedTreeMap.class).get("files");
         ArrayList<File> newFiles = new ArrayList<>();
-        requestData.forEach(rawFile -> newFiles.add(new File(rawFile.get("filename").toString(), rawFile.get("hash").toString(), ((Double) Double.parseDouble(rawFile.get("size").toString())).longValue(), new ArrayList<User>())));
+        requestData.forEach(rawFile -> newFiles.add(new File(rawFile.get("filename").toString(), rawFile.get("hash").toString(), ((Double) Double.parseDouble(rawFile.get("size").toString())).longValue(), new ArrayList<>())));
 
-        return switch (dataDB.upload(httpRequest.getSourceIP(), newFiles))
-                {
-                    case 0 -> successResponse.build();
-                    default -> serverErrorResponse.build();
-                };
+        return switch (dataDB.upload(httpRequest.sourceIP(), newFiles))
+        {
+            case 0 -> successResponse.build();
+            default -> serverErrorResponse.build();
+        };
     }
 }

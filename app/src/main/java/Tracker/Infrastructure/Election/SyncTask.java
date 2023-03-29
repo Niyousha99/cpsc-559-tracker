@@ -6,13 +6,15 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-public class SyncTask implements Runnable {
+public class SyncTask implements Runnable
+{
     private final String sourceIp;
     private final String destinationIp;
     private final int destinationPort;
     private final byte[] message;
 
-    public SyncTask(String sourceIp, String destinationIp, int destinationPort, byte[] message) {
+    public SyncTask(String sourceIp, String destinationIp, int destinationPort, byte[] message)
+    {
         this.sourceIp = sourceIp;
         this.destinationIp = destinationIp;
         this.destinationPort = destinationPort;
@@ -20,9 +22,11 @@ public class SyncTask implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void run()
+    {
         Socket socket = new Socket();
-        try {
+        try
+        {
             socket.bind(new InetSocketAddress(InetAddress.getByName(sourceIp), 0));
             socket.connect(new InetSocketAddress(InetAddress.getByName(destinationIp), destinationPort), 10000);
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
@@ -30,11 +34,15 @@ public class SyncTask implements Runnable {
             outputStream.flush();
             socket.shutdownOutput();
             socket.close();
-        }
-
-        catch (IOException ie) {
+        } catch (IOException ie)
+        {
             //ie.printStackTrace();
-            try {socket.close();} catch (IOException ie1) {}
+            try
+            {
+                socket.close();
+            } catch (IOException ie1)
+            {
+            }
         }
     }
 }

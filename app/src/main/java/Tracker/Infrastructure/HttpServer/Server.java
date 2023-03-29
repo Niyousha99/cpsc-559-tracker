@@ -1,22 +1,18 @@
 package Tracker.Infrastructure.HttpServer;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
+import Tracker.Infrastructure.Election.ElectionManager;
+import Tracker.Infrastructure.ProcessManager;
+import Tracker.Infrastructure.Task;
+
+import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import Tracker.Infrastructure.ProcessManager;
-import Tracker.Infrastructure.Task;
-import Tracker.Infrastructure.Election.ElectionManager;
-
-public class Server 
+public class Server
 {
-    private String ip;
-    private final int port;
     private static final int TIMEOUT = 1000;
+    private final int port;
+    private String ip;
 
     public Server(String ip, int port)
     {
@@ -29,11 +25,12 @@ public class Server
         try
         {
             ServerSocket serverSocket;
-            if (ip == null) {
+            if (ip == null)
+            {
                 serverSocket = new ServerSocket(port);
                 ip = serverSocket.getInetAddress().getHostAddress();
-            }
-            else {
+            } else
+            {
                 serverSocket = new ServerSocket(port, 50, InetAddress.getByName(ip.trim()));
             }
             serverSocket.setSoTimeout(TIMEOUT);

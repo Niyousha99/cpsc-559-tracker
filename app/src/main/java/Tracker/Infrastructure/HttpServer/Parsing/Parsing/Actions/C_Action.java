@@ -1,48 +1,49 @@
 package Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Token;
 import Tracker.Infrastructure.HttpServer.Parsing.Parsing.TokenIdentifier;
 
-public class C_Action implements Action {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public class C_Action implements Action
+{
     boolean done = false;
     String fieldValue = null;
 
     private C_Action() {}
 
+    public static ActionBuilder<C_Action> getBuilder()
+    {
+        return new ActionBuilder<>(C_Action::new);
+    }
+
     @Override
-    public boolean isDone() {
+    public boolean isDone()
+    {
         return done;
     }
 
     @Override
-    public void act(Token token) {
-        if (token.getIdentifier().equals(TokenIdentifier.CRLF)) {
+    public void act(Token token)
+    {
+        if (token.identifier().equals(TokenIdentifier.CRLF))
+        {
             done = true;
-            return;
-        }
-
-        else if (fieldValue != null) {
-            fieldValue = fieldValue + token.getLexeme();
-        }
-
-        else if ((token.getIdentifier().equals(TokenIdentifier.WORD)) || (token.getIdentifier().equals(TokenIdentifier.COLON))) {
-            fieldValue = token.getLexeme();
+        } else if (fieldValue != null)
+        {
+            fieldValue = fieldValue + token.lexeme();
+        } else if ((token.identifier().equals(TokenIdentifier.WORD)) || (token.identifier().equals(TokenIdentifier.COLON)))
+        {
+            fieldValue = token.lexeme();
         }
     }
-    
+
     @Override
-    public ArrayList<String> collect() {
-        if (fieldValue != null) { 
-            return new ArrayList<String>(Arrays.asList(fieldValue));
-        }
-        return new ArrayList<String>(Arrays.asList(""));
+    public ArrayList<String> collect()
+    {
+        return new ArrayList<>(List.of(Objects.requireNonNullElse(fieldValue, "")));
     }
 
-    public static ActionBuilder<C_Action> getBuilder() {
-        return new ActionBuilder<C_Action>(C_Action::new);
-    }
-    
 }

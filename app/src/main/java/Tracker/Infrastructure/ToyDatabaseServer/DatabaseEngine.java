@@ -5,6 +5,7 @@ import Tracker.Infrastructure.ToyDatabaseServer.Model.User;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public final class DatabaseEngine
 {
@@ -43,8 +44,8 @@ public final class DatabaseEngine
     {
         try
         {
-            return new ArrayList<File>(deepClone(database).files().values());
-        } catch (Exception exception)
+            return new ArrayList<>(Objects.requireNonNull(deepClone(database)).files().values());
+        } catch (NullPointerException exception)
         {
             return null;
         }
@@ -54,8 +55,8 @@ public final class DatabaseEngine
     {
         try
         {
-            return deepClone(database).files().get(hash);
-        } catch (Exception exception)
+            return Objects.requireNonNull(deepClone(database)).files().get(hash);
+        } catch (NullPointerException exception)
         {
             return null;
         }
