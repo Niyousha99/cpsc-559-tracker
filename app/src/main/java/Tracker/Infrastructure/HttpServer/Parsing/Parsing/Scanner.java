@@ -1,15 +1,13 @@
 package Tracker.Infrastructure.HttpServer.Parsing.Parsing;
 
-import java.io.DataInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
-
 import Tracker.Infrastructure.Utils.FailureException;
 
-public class Scanner {
+import java.io.DataInputStream;
+import java.util.HashMap;
+import java.util.Queue;
+
+public class Scanner
+{
     public static final int MAX_BUFFER_SIZE = 1048576;
     public static final String DEFAULT_CHARSET = "utf-8";
 
@@ -21,14 +19,15 @@ public class Scanner {
     private final DataInputStream input;
     private final Queue<Token> queue;
     private final byte[] buffer;
-    
+
     private int iterator;
     private int limit;
     private String context;
     private String tmp;
     private boolean inputDone;
 
-    public Scanner(DataInputStream input, Queue<Token> queue) {
+    public Scanner(DataInputStream input, Queue<Token> queue)
+    {
         this.input = input;
         this.queue = queue;
         this.buffer = new byte[MAX_BUFFER_SIZE];
@@ -37,7 +36,7 @@ public class Scanner {
         this.context = "";
         this.inputDone = false;
 
-        this.isSpace = new HashMap<Character, Boolean>();
+        this.isSpace = new HashMap<>();
         this.isSpace.put((char) 32, true);
         this.isSpace.put((char) 9, true);
         this.isSpace.put((char) 10, true);
@@ -46,67 +45,79 @@ public class Scanner {
         this.tmp = "";
     }
 
-    public void scan() throws FailureException {
+    public void scan() throws FailureException
+    {
         scanForTokens();
     }
 
-    public String consumeContext() {
-        if (context == null) {
+    public String consumeContext()
+    {
+        if (context == null)
+        {
             return "";
         }
-        String res = new String(context);
+        String res = context;
         context = null;
         return res;
     }
 
-    public int getContext() {
+    public int getContext()
+    {
         return iterator;
     }
 
-    public DataInputStream releaseStream() {
+    public DataInputStream releaseStream()
+    {
         return input;
     }
 
-    private void scanForTokens() throws FailureException {
+    private void scanForTokens() throws FailureException
+    {
         int c;
-        while (((c = get()) != -1) && (this.isSpace.getOrDefault((char) c, false))) {
-            if ((char) c == '\r') {
-                if ((char) get() == '\n') {
+        while (((c = get()) != -1) && (this.isSpace.getOrDefault((char) c, false)))
+        {
+            if ((char) c == '\r')
+            {
+                if ((char) get() == '\n')
+                {
                     this.queue.add(new Token(TokenIdentifier.CRLF, "\r\n"));
                     return;
-                }
-
-                else {
+                } else
+                {
                     unget();
                 }
             }
 
-            if (c == 32) {
-                this.queue.add(new Token(TokenIdentifier.SP, "" + (char) c));
+            if (c == 32)
+            {
+                this.queue.add(new Token(TokenIdentifier.SP, String.valueOf((char) c)));
                 return;
-            }
-
-            else if (c == 9) {
-                this.queue.add(new Token(TokenIdentifier.HTAB, "" + (char) c));
+            } else if (c == 9)
+            {
+                this.queue.add(new Token(TokenIdentifier.HTAB, String.valueOf((char) c)));
                 return;
             }
         }
 
-        if (c == -1) {
+        if (c == -1)
+        {
             this.queue.add(new Token(TokenIdentifier.EOF, ""));
             return;
         }
 
-        if ((char) c == ':') {
+        if ((char) c == ':')
+        {
             this.queue.add(new Token(TokenIdentifier.COLON, ":"));
             return;
         }
 
-        while (((c > 32) && (c <= 126)) && ((char) c != ':')) {
+        while (((c > 32) && (c <= 126)) && ((char) c != ':'))
+        {
             tmp = tmp + (char) c;
             c = get();
         }
-        if (tmp.length() > 0) {
+        if (tmp.length() > 0)
+        {
             this.queue.add(new Token(TokenIdentifier.WORD, tmp));
             resetTmp();
             unget();
@@ -117,56 +128,65 @@ public class Scanner {
     }
 
 
-    private int get() {
-        if (this.iterator >= this.limit) {
+    private int get()
+    {
+        if (this.iterator >= this.limit)
+        {
             nextContext();
         }
 
-        if (this.iterator >= this.limit) {
+        if (this.iterator >= this.limit)
+        {
             return -1;
         }
 
         char c = context.charAt(iterator);
         iterator++;
-        return (int) c;
+        return c;
     }
 
-    private void unget()  {
-        if (this.iterator > 0) {
+    private void unget()
+    {
+        if (this.iterator > 0)
+        {
             this.iterator--;
         }
     }
 
-    private void resetTmp() {
+    private void resetTmp()
+    {
         this.tmp = "";
     }
 
-    public void nextContext() {
-        if (inputDone) {
+    public void nextContext()
+    {
+        if (inputDone)
+        {
             return;
         }
         int readBytes = -1;
-        try {
-            if ((readBytes = input.read(buffer)) != -1) {
+        try
+        {
+            if ((readBytes = input.read(buffer)) != -1)
+            {
                 String tm = context;
                 context = new String(buffer, 0, readBytes, DEFAULT_CHARSET);
                 iterator = 0;
 
-                if (tm.length() > 0) {
-                    context = tm.charAt(tm.length()-1) + context;
+                if (tm.length() > 0)
+                {
+                    context = tm.charAt(tm.length() - 1) + context;
                     iterator++;
                 }
 
-                limit = context.length();                
-            }
-
-            else {
+                limit = context.length();
+            } else
+            {
                 inputDone = true;
                 context = "";
             }
-        }
-
-        catch (Exception e) {
+        } catch (Exception e)
+        {
             inputDone = true;
         }
     }

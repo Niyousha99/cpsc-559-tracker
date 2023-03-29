@@ -1,34 +1,36 @@
 package Tracker.Infrastructure.HttpServer.Parsing.Parsing;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions.Action;
 import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions.ActionBuilder;
 
-public class NonTerminal<T extends Action> implements Production {
-    private HashMap<TokenIdentifier, ArrayList<Grammer>> productions;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class NonTerminal<T extends Action> implements Production
+{
     private final ActionBuilder<T> actionBuilder;
-    
-    public NonTerminal(ActionBuilder<T> actionBuilder) {
+    private HashMap<TokenIdentifier, ArrayList<Grammar>> productions;
+
+    public NonTerminal(ActionBuilder<T> actionBuilder)
+    {
         this.actionBuilder = actionBuilder;
     }
 
-    public void setProductions(HashMap<TokenIdentifier, ArrayList<Grammer>> productions) {
+    public void setProductions(HashMap<TokenIdentifier, ArrayList<Grammar>> productions)
+    {
         this.productions = productions;
     }
 
-    public Action generateAction() {
+    public Action generateAction()
+    {
         return this.actionBuilder.build();
     }
 
     @Override
-    public ArrayList<Grammer> produce(Token token) {
-        return productions.getOrDefault(token.getIdentifier(), productions.get(TokenIdentifier.EOF));
+    public ArrayList<Grammar> produce(Token token)
+    {
+        return productions.getOrDefault(token.identifier(), productions.get(TokenIdentifier.EOF));
     }
 
 
-    
 }

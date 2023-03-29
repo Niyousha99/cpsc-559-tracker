@@ -18,11 +18,6 @@ public class App
 {
     private static String databasePath;
 
-    public String getGreeting()
-    {
-        return "Hello World!";
-    }
-
     public static void main(String[] args)
     {
         HashMap<String, String> params = parseCommandLine(args);
@@ -55,7 +50,7 @@ public class App
     // parse command line arguments
     private static HashMap<String, String> parseCommandLine(String[] args)
     {
-        HashMap<String, String> params = new HashMap<String, String>();
+        HashMap<String, String> params = new HashMap<>();
 
         int i = 0;
         while ((i + 1) < args.length)

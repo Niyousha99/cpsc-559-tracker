@@ -1,15 +1,16 @@
 package Tracker.Infrastructure.HttpServer.Parsing.Parsing.Actions;
 
-import java.util.ArrayList;
-
 import Tracker.Infrastructure.HttpServer.Parsing.Parsing.Token;
 
-public interface Action  {
+import java.util.ArrayList;
 
-    abstract boolean isDone();
-    
-    abstract void act(Token token);
-    
-    abstract ArrayList<String> collect();
-    
+public interface Action
+{
+
+    boolean isDone();
+
+    void act(Token token);
+
+    ArrayList<String> collect();
+
 }

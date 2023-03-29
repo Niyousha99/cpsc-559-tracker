@@ -29,7 +29,7 @@ public class DatabaseConnectionManager
         else databaseModel = DatabaseBuilder.buildDatabaseFromFile(path);
 
         databaseModel.files().forEach((hash, file) -> {
-            ArrayList<User> owners = new ArrayList<User>();
+            ArrayList<User> owners = new ArrayList<>();
             files.put(file.hash(), new File(file.filename(), file.hash(), file.size(), owners));
             file.owners().forEach(owner -> {
                 if (users.containsKey(owner.ipAddress())) owners.add(users.get(owner.ipAddress()));
@@ -46,6 +46,7 @@ public class DatabaseConnectionManager
         database = new Database(users, files);
         DatabaseEngine.setDatabase(database);
     }
+
     public static void importDB(String jsonDB)
     {
         Database databaseModel;
@@ -55,7 +56,7 @@ public class DatabaseConnectionManager
         databaseModel = DatabaseBuilder.buildDatabaseFromJSON(jsonDB);
 
         databaseModel.files().forEach((hash, file) -> {
-            ArrayList<User> owners = new ArrayList<User>();
+            ArrayList<User> owners = new ArrayList<>();
             files.put(file.hash(), new File(file.filename(), file.hash(), file.size(), owners));
             file.owners().forEach(owner -> {
                 if (users.containsKey(owner.ipAddress())) owners.add(users.get(owner.ipAddress()));

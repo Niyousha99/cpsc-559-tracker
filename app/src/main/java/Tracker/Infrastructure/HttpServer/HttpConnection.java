@@ -27,9 +27,9 @@ public class HttpConnection
         this.inputStream = inputStream;
     }
 
-    public HttpRequestObject getHttpRequest() throws IOException, FailureException
+    public HttpRequestObject getHttpRequest() throws FailureException
     {
-        Queue<Token> queue = new LinkedList<Token>();
+        Queue<Token> queue = new LinkedList<>();
         Scanner scanner = new Scanner(inputStream, queue);
         Parser parser = new Parser(scanner, queue);
         HttpRequestBuilder requestBuilder = parser.parse();
