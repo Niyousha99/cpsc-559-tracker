@@ -28,6 +28,8 @@ public class DatabaseConnectionManager
         if (cleanDB) databaseModel = new Gson().fromJson("{\"users\":{},\"files\":{}}", Database.class);
         else databaseModel = DatabaseBuilder.buildDatabaseFromFile(path);
 
+        if (databaseModel == null) databaseModel = new Gson().fromJson("{\"users\":{},\"files\":{}}", Database.class);
+
         databaseModel.files().forEach((hash, file) -> {
             ArrayList<User> owners = new ArrayList<>();
             files.put(file.hash(), new File(file.filename(), file.hash(), file.size(), owners));
