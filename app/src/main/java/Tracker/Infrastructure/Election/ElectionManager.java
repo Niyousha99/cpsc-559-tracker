@@ -53,7 +53,7 @@ public class ElectionManager
         ExecutorService executor = Executors.newCachedThreadPool();
         List<PingTask> pingTaskList = new ArrayList<>();
         pingTaskList.add(new PingTask(self_ip, leader, self_port, pingMessage));
-        System.out.println("Sending ping");
+        System.out.println("Pinging leader");
         try
         {
             return !executor.invokeAny(pingTaskList, waitTime, TimeUnit.MILLISECONDS);
@@ -121,12 +121,12 @@ public class ElectionManager
         try
         {
             bullyReceived = executor.invokeAny(initiateElectionTaskList, waitTime, TimeUnit.MILLISECONDS);
-            System.out.println("bully received");
+            System.out.println("Bully message received");
             //executor.shutdown();
         } catch (InterruptedException | NullPointerException | RejectedExecutionException | ExecutionException |
                  TimeoutException e)
         {
-            //e.printStackTrace();
+            System.out.println("No bully message received");
         }
 
         // if no bully, inform processes they are the leader
@@ -167,7 +167,7 @@ public class ElectionManager
             leader = electionMessage.getProcess();
             running = false;
             socket.close();
-            System.out.println("leader set to " + leader);
+            System.out.println("Leader set to " + leader);
         } else if (electionMessage.getMessageType() == MessageType.election)
         {
             if (electionMessage.getProcess().compareToIgnoreCase(self_ip) < 0)
@@ -188,7 +188,7 @@ public class ElectionManager
             }
         } else if (electionMessage.getMessageType() == MessageType.ping)
         {
-            System.out.println("Got ping");
+            System.out.println("Got ping message");
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             outputStream.write("OK".getBytes());
             outputStream.flush();
