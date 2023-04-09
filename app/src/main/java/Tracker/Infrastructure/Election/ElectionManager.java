@@ -107,6 +107,7 @@ public class ElectionManager
             } catch (InterruptedException | NullPointerException | RejectedExecutionException | ExecutionException |
                      TimeoutException e)
             {
+                System.out.println("Did not receive date from existing leader");
             }
         }
 
@@ -122,7 +123,6 @@ public class ElectionManager
         {
             bullyReceived = executor.invokeAny(initiateElectionTaskList, waitTime, TimeUnit.MILLISECONDS);
             System.out.println("Bully message received");
-            //executor.shutdown();
         } catch (InterruptedException | NullPointerException | RejectedExecutionException | ExecutionException |
                  TimeoutException e)
         {
