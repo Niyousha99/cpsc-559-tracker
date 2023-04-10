@@ -107,7 +107,7 @@ public class ElectionManager
             } catch (InterruptedException | NullPointerException | RejectedExecutionException | ExecutionException |
                      TimeoutException e)
             {
-                System.out.println("Did not receive date from existing leader");
+                System.out.println("Did not receive data from existing leader");
             }
         }
 
