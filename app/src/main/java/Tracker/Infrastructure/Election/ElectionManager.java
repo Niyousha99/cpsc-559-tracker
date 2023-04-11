@@ -25,6 +25,14 @@ public class ElectionManager
     private static String self_ip;
     private static int self_port;
 
+    // Stores the listening IP and port of the tracker
+    public static synchronized void initialize(String ip, int port)
+    {
+        self_ip = ip;
+        self_port = port;
+    }
+
+    // Returns the leader's IP address, null if there isn't one and self if it is the tracker itself
     public static String getLeader()
     {
         if (leader == null) return null;
@@ -32,11 +40,13 @@ public class ElectionManager
         else return leader;
     }
 
+    // Gets the tracker's listening port
     public static int getPort()
     {
         return self_port;
     }
 
+    // Checks to see if the leader is still alive
     public static synchronized boolean detectFailure()
     {
         if (leader == null)
@@ -64,27 +74,26 @@ public class ElectionManager
         return true;
     }
 
-    public static synchronized void initialize(String ip, int port)
-    {
-        self_ip = ip;
-        self_port = port;
-    }
-
+    // Initiates an election
     public static synchronized void initiateElection()
     {
         running = true;
         leader = null;
 
+        // Get the local IP address and store the range where other tracker's could be found
         String[] strs = self_ip.split("\\.");
         System.out.println(self_ip);
         String prefix = strs[0] + "." + strs[1] + "." + strs[2];
         int startSuffix = Integer.parseInt(strs[3]) + 1;
 
+        // Creates an election initiation message
         byte[] initiateMessage = gson.toJson(new ElectionMessage(MessageType.election, self_ip), ElectionMessage.class).getBytes();
 
+        // Create a pool that will handle the distribution of the election initiation message
         List<ElectionTask> initiateElectionTaskList = new ArrayList<>();
         ExecutorService executor = Executors.newCachedThreadPool();
 
+        // If it's the first startup of the tracker, then asks around for the existing leader's DB and imports it in first
         if (initialStartup)
         {
             initialStartup = false;
@@ -111,14 +120,15 @@ public class ElectionManager
             }
         }
 
+        // Sends out the election initiation message
         boolean bullyReceived = false;
-
         while (startSuffix < 254)
         {
             initiateElectionTaskList.add(new ElectionTask(self_ip, prefix + "." + startSuffix, self_port, initiateMessage));
             startSuffix++;
         }
 
+        // Checks to see if a bully message was received
         try
         {
             bullyReceived = executor.invokeAny(initiateElectionTaskList, waitTime, TimeUnit.MILLISECONDS);
@@ -129,7 +139,7 @@ public class ElectionManager
             System.out.println("No bully message received");
         }
 
-        // if no bully, inform processes they are the leader
+        // If no bully message was received, inform the rest that it is now the leader and send a DB update
         if (!bullyReceived)
         {
             leader = self_ip;
@@ -149,11 +159,13 @@ public class ElectionManager
         running = false;
     }
 
+    // Called any time a message is received that is not designed for the Rest API
     public static synchronized void receiveMessage(Socket socket, DataInputStream inputStream) throws IOException, JsonSyntaxException
     {
         byte[] message = inputStream.readAllBytes();
         ElectionMessage electionMessage = gson.fromJson(new String(message), ElectionMessage.class);
 
+        // Checks to see if the tracker is the leader & that if it is being requested for the current DB by a recently started tracker
         if (electionMessage.getMessageType() == MessageType.request && leader.equalsIgnoreCase(self_ip))
         {
             System.out.println("Sending data to requester");
@@ -162,13 +174,17 @@ public class ElectionManager
             outputStream.write(dataMessage);
             outputStream.flush();
             socket.close();
-        } else if (electionMessage.getMessageType() == MessageType.leader)
+        }
+        // Stores the new leader's IP if a leader message was received
+        else if (electionMessage.getMessageType() == MessageType.leader)
         {
             leader = electionMessage.getProcess();
             running = false;
             socket.close();
             System.out.println("Leader set to " + leader);
-        } else if (electionMessage.getMessageType() == MessageType.election)
+        }
+        // Either send a bully message or initiate an election based on if the IP address is greater than or less than that of the sender
+        else if (electionMessage.getMessageType() == MessageType.election)
         {
             if (electionMessage.getProcess().compareToIgnoreCase(self_ip) < 0)
             {
@@ -186,14 +202,18 @@ public class ElectionManager
             {
                 socket.close();
             }
-        } else if (electionMessage.getMessageType() == MessageType.ping)
+        }
+        // Handle a heartbeat ping (intended for the leader)
+        else if (electionMessage.getMessageType() == MessageType.ping)
         {
             System.out.println("Got ping message");
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             outputStream.write("OK".getBytes());
             outputStream.flush();
             socket.close();
-        } else if (electionMessage.getMessageType() == MessageType.sync)
+        }
+        // Handle a sync message by imported in the passed DB
+        else if (electionMessage.getMessageType() == MessageType.sync)
         {
             System.out.println("Got sync data");
             if (electionMessage.getProcess().equals(leader) && !electionMessage.getProcess().equals(self_ip))
@@ -201,6 +221,7 @@ public class ElectionManager
         }
     }
 
+    // Sends a serialized copy of the DB to all the follower trackers in the network
     public static synchronized void syncFollowers()
     {
         System.out.println("Sending sync data");

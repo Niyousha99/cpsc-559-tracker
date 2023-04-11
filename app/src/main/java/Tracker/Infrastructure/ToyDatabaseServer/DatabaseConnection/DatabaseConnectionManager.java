@@ -19,6 +19,7 @@ public class DatabaseConnectionManager
 {
     private static Database database;
 
+    // Creates and populates a DB instance if possible to, otherwise starts up with a fresh default
     public static void initialize(String path, boolean cleanDB) throws JsonIOException, JsonSyntaxException, FileNotFoundException
     {
         Database databaseModel;
@@ -49,6 +50,7 @@ public class DatabaseConnectionManager
         DatabaseEngine.setDatabase(database);
     }
 
+    // Imports in the serialized DB
     public static void importDB(String jsonDB)
     {
         Database databaseModel;
@@ -76,6 +78,7 @@ public class DatabaseConnectionManager
         DatabaseEngine.setDatabase(database);
     }
 
+    // Saves out the current state of the DB to a file
     public static void shutdown(String path)
     {
         try

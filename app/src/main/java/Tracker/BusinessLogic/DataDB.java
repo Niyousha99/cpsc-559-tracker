@@ -7,15 +7,21 @@ import java.util.ArrayList;
 
 public interface DataDB
 {
+    // Removes an IP from being the host of any file
     int exit(String ipAddress);
 
+    // Get a serialized version of the local DB
     Database getDB();
 
+    // Get a list of all the available files in the DB
     ArrayList<File> getFiles();
 
-    File getFile(String name);
+    // Get a list of peers for a specific file
+    File getFile(String hash);
 
+    // Remove IP from being the host of a specific file
     int removeOwner(String ipAddress, String hash);
 
-    int upload(String ipAddress, ArrayList<File> newFiles);
+    // Adds the IP to be the host of all the files provided
+    int upload(String ipAddress, ArrayList<File> files);
 }

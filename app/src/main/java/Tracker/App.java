@@ -20,16 +20,18 @@ public class App
 
     public static void main(String[] args)
     {
+        // Parse command line arguments
         HashMap<String, String> params = parseCommandLine(args);
         databasePath = params.getOrDefault("-d", FileSystems.getDefault().getPath("").toAbsolutePath() + "/Database.txt");
         String serverIP = params.getOrDefault("-ip", null);
         int serverPort = Integer.parseInt(params.getOrDefault("-p", "3001")); // server port number
 
+        // Adds an event to save the DB to a file that will run when the applications is gracefully shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(() -> DatabaseConnectionManager.shutdown(databasePath)));
 
         System.out.println("Starting the server on port " + serverPort);
         Server server = new Server(serverIP, serverPort);
-        // initialize database
+        // Initialize the DB
         try
         {
             if (Files.exists(Path.of(databasePath)))
@@ -47,7 +49,7 @@ public class App
         server.listen();
     }
 
-    // parse command line arguments
+    // Parse command line arguments
     private static HashMap<String, String> parseCommandLine(String[] args)
     {
         HashMap<String, String> params = new HashMap<>();

@@ -6,6 +6,7 @@ public class ProcessManager implements Runnable
 {
     private final long waitTime = 10000;
 
+    // Runs an infinite loop that constantly pings to see if the leader is still alive, otherwise starts an election
     private void loop()
     {
         try

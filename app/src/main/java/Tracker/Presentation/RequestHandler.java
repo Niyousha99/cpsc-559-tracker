@@ -33,6 +33,7 @@ public class RequestHandler
         this.dataDB = new DataDBImpl(DatabaseConnectionManager.getConnection());
     }
 
+    // Calls the GET/POST method depending on the request, otherwise informs it that it send a bad requests
     public HttpResponse handleRequest(HttpRequestObject httpRequest)
     {
         String[] requestPath = httpRequest.path().split("\\?");
@@ -46,6 +47,7 @@ public class RequestHandler
         else return serverErrorResponse.build();
     }
 
+    // Handles all GET requests
     private HttpResponse handleGet(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         return switch (requestPath[0])
@@ -57,6 +59,7 @@ public class RequestHandler
         };
     }
 
+    // Handles all POST requests
     private HttpResponse handlePost(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         if (ElectionManager.getLeader() == null) return serverErrorResponse.build();
@@ -80,12 +83,14 @@ public class RequestHandler
         }
     }
 
+    // Get a serialized version of the local DB
     private HttpResponse getDB(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /getDB endpoint");
         return successResponse.withBody(new GsonBuilder().setPrettyPrinting().create().toJson(dataDB.getDB())).build();
     }
 
+    // Removes an IP from being the host of any file
     private HttpResponse exit(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /exit endpoint");
@@ -97,6 +102,7 @@ public class RequestHandler
         };
     }
 
+    // Get a list of all the available files in the DB
     private HttpResponse getFiles(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /getFiles endpoint");
@@ -110,6 +116,7 @@ public class RequestHandler
         } else return serverErrorResponse.build();
     }
 
+    // Get a list of peers for a specific file
     private HttpResponse getFile(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /getFile endpoint");
@@ -122,6 +129,7 @@ public class RequestHandler
         } else return serverErrorResponse.build();
     }
 
+    // Remove IP from being the host of a specific file
     private HttpResponse removeOwner(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /removeOwner endpoint");
@@ -133,6 +141,7 @@ public class RequestHandler
         };
     }
 
+    // Adds the IP to be the host of all the files provided
     private HttpResponse upload(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /upload endpoint");
