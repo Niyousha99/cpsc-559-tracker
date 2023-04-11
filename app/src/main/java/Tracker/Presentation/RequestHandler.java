@@ -89,7 +89,8 @@ public class RequestHandler
     private HttpResponse exit(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /exit endpoint");
-        return switch (dataDB.exit(httpRequest.sourceIP()))
+        LinkedTreeMap requestData = new Gson().fromJson(httpRequest.body(), LinkedTreeMap.class);
+        return switch (dataDB.exit((String) requestData.get("ip")))
         {
             case 0 -> successResponse.build();
             default -> serverErrorResponse.build();
@@ -124,7 +125,8 @@ public class RequestHandler
     private HttpResponse removeOwner(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /removeOwner endpoint");
-        return switch (dataDB.removeOwner(httpRequest.sourceIP(), requestParameters.get("hash")))
+        LinkedTreeMap requestData = new Gson().fromJson(httpRequest.body(), LinkedTreeMap.class);
+        return switch (dataDB.removeOwner((String) requestData.get("ip"), (String) requestData.get("hash")))
         {
             case 0 -> successResponse.build();
             default -> serverErrorResponse.build();
@@ -134,11 +136,12 @@ public class RequestHandler
     private HttpResponse upload(HttpRequestObject httpRequest, String[] requestPath, Map<String, String> requestParameters)
     {
         System.out.println("Called /upload endpoint");
-        ArrayList<LinkedTreeMap> requestData = (ArrayList) new Gson().fromJson(httpRequest.body(), LinkedTreeMap.class).get("files");
+        LinkedTreeMap requestData = new Gson().fromJson(httpRequest.body(), LinkedTreeMap.class);
+        ArrayList<LinkedTreeMap> filesData = (ArrayList) requestData.get("files");
         ArrayList<File> newFiles = new ArrayList<>();
-        requestData.forEach(rawFile -> newFiles.add(new File(rawFile.get("filename").toString(), rawFile.get("hash").toString(), ((Double) Double.parseDouble(rawFile.get("size").toString())).longValue(), new ArrayList<>())));
+        filesData.forEach(rawFile -> newFiles.add(new File(rawFile.get("filename").toString(), rawFile.get("hash").toString(), ((Double) Double.parseDouble(rawFile.get("size").toString())).longValue(), new ArrayList<>())));
 
-        return switch (dataDB.upload(httpRequest.sourceIP(), newFiles))
+        return switch (dataDB.upload((String) requestData.get("ip"), newFiles))
         {
             case 0 -> successResponse.build();
             default -> serverErrorResponse.build();
