@@ -16,25 +16,31 @@ public class DataDBImpl implements DataDB
         this.connection = connection;
     }
 
+    // Get a serialized version of the local DB
     public Database getDB()
     {
         return connection.getDB();
     }
 
+    // Get a list of all the available files in the DB
     public ArrayList<File> getFiles()
     {
         return connection.getFiles();
     }
 
+    // Get a list of peers for a specific file
     public File getFile(String hash)
     {
         return connection.getFile(hash);
     }
 
+    // Remove IP from being the host of a specific file
     public int removeOwner(String ipAddress, String hash) {return connection.removeOwner(ipAddress, hash);}
 
-    public int upload(String ipAddress, ArrayList<File> newFiles) {return connection.addFiles(ipAddress, newFiles);}
+    // Adds the IP to be the host of all the files provided
+    public int upload(String ipAddress, ArrayList<File> files) {return connection.addFiles(ipAddress, files);}
 
+    // Removes an IP from being the host of any file
     public int exit(String ipAddress)
     {
         return connection.removeUser(ipAddress);

@@ -17,6 +17,7 @@ public final class DatabaseEngine
         purgeUnavailableFiles();
     }
 
+    // Creates a deep clone of any object that is passed in to prevent the receiver from updating hte original instance
     private static <T> T deepClone(T input)
     {
         try
@@ -29,6 +30,7 @@ public final class DatabaseEngine
         }
     }
 
+    // Provides a clone of the DB
     public static synchronized Database getDB()
     {
         try
@@ -40,6 +42,8 @@ public final class DatabaseEngine
         }
     }
 
+
+    // Get a list of all the available files in the DB
     public static synchronized ArrayList<File> getFiles()
     {
         try
@@ -51,6 +55,7 @@ public final class DatabaseEngine
         }
     }
 
+    // Gets the file with the matching hash
     public static synchronized File getFile(String hash)
     {
         try
@@ -62,6 +67,7 @@ public final class DatabaseEngine
         }
     }
 
+    // Adds a client to the list of online clients
     private static synchronized int addUser(String ipAddress)
     {
         try
@@ -74,6 +80,8 @@ public final class DatabaseEngine
         }
     }
 
+
+    // Remove a client from the online list
     public static synchronized int removeUser(String ipAddress)
     {
         try
@@ -88,6 +96,7 @@ public final class DatabaseEngine
         }
     }
 
+    // Remove a client from being the host of a specific file
     public static synchronized int removeOwner(String ipAddress, String hash)
     {
         try
@@ -101,13 +110,14 @@ public final class DatabaseEngine
         }
     }
 
-    public static synchronized int addFiles(String ipAddress, ArrayList<File> newFiles)
+    // Adds the IP to be the host of all the files provided
+    public static synchronized int addFiles(String ipAddress, ArrayList<File> files)
     {
         try
         {
             if (database.users().get(ipAddress) == null) addUser(ipAddress);
 
-            newFiles.forEach(newFile -> {
+            files.forEach(newFile -> {
                 if (database.files().containsKey(newFile.hash()))
                 {
                     if (!database.files().get(newFile.hash()).owners().contains(database.users().get(ipAddress)))
@@ -125,6 +135,7 @@ public final class DatabaseEngine
         }
     }
 
+    // Purges files that have no owner online
     private static synchronized void purgeUnavailableFiles()
     {
         database.files().forEach((hash, file) -> {

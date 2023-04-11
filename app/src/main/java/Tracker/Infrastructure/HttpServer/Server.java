@@ -20,6 +20,7 @@ public class Server
         this.port = port;
     }
 
+    // Starts listening for incoming requests
     public void listen()
     {
         try
