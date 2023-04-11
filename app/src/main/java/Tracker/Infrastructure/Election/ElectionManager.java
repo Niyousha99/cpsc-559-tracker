@@ -89,7 +89,7 @@ public class ElectionManager
         {
             initialStartup = false;
             List<RequestTask> requestTaskList = new ArrayList<>();
-            for (int ipSuffix = 1; ipSuffix <= 10; ipSuffix++)
+            for (int ipSuffix = 1; ipSuffix <= 254; ipSuffix++)
             {
                 if (ipSuffix == Integer.parseInt(strs[3])) continue;
 
@@ -113,7 +113,7 @@ public class ElectionManager
 
         boolean bullyReceived = false;
 
-        while (startSuffix < 10)
+        while (startSuffix < 254)
         {
             initiateElectionTaskList.add(new ElectionTask(self_ip, prefix + "." + startSuffix, self_port, initiateMessage));
             startSuffix++;
@@ -135,7 +135,7 @@ public class ElectionManager
             leader = self_ip;
             System.out.println("leader set to " + leader);
             byte[] leaderMessage = gson.toJson(new ElectionMessage(MessageType.leader, self_ip), ElectionMessage.class).getBytes();
-            for (int i = 1; i < 10; i++)
+            for (int i = 1; i < 254; i++)
             {
                 if (i == Integer.parseInt(strs[3]))
                 {
@@ -209,7 +209,7 @@ public class ElectionManager
         ExecutorService executor = Executors.newCachedThreadPool();
 
         byte[] dataMessage = gson.toJson(new ElectionMessage(MessageType.sync, self_ip, new GsonBuilder().setPrettyPrinting().create().toJson(new DataDBImpl(DatabaseConnectionManager.getConnection()).getDB())), ElectionMessage.class).getBytes();
-        for (int i = 1; i < 10; i++)
+        for (int i = 1; i < 254; i++)
         {
             if (i == Integer.parseInt(strs[3]))
             {
